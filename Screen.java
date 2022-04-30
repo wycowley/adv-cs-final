@@ -84,6 +84,9 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
                 grid.moveDownActiveBlock();
             }
         }
+        if(e.getKeyCode()==38){
+            grid.rotateActiveBlock();
+        }
         repaint();
     }
 

@@ -28,7 +28,8 @@ public class GridManager {
     public void createBlock(){
         System.out.println("CREATED A BLOCK");
         // let's just create an l block for now
-        if((int)(Math.random()*2)==0){
+        int random = (int)(Math.random()*3);
+        if(random==0){
 
             Block b = new Block('l',blockNum);
             blockNum++;
@@ -45,7 +46,10 @@ public class GridManager {
             b.addTile(grid[4][0]);
             b.addTile(grid[5][0]);
             b.addTile(grid[6][0]);
-        }else{
+            
+            b.setRotationStart(new Tile(3,-1));
+
+        }else if(random==1){
             Block b = new Block('o',blockNum);
             blockNum++;
             blocks.add(b);
@@ -60,14 +64,32 @@ public class GridManager {
             b.addTile(grid[5][0]);
             b.addTile(grid[4][1]);
             b.addTile(grid[5][1]);
-            
+
+            b.setRotationStart(new Tile(4,0));
+        }else{
+            Block b = new Block('t',blockNum);
+            blockNum++;
+            blocks.add(b);
+            b.setMoving(true);
+ 
+            grid[5][0].addBlock(b);
+            grid[4][1].addBlock(b);
+            grid[5][1].addBlock(b);
+            grid[6][1].addBlock(b);
+
+            b.addTile(grid[5][0]);
+            b.addTile(grid[4][1]);
+            b.addTile(grid[5][1]);
+            b.addTile(grid[6][1]);
+
+            b.setRotationStart(new Tile(4,0));
 
         }
 
 
 
     }
-    public void moveRightActiveBlock(){
+    public synchronized void moveRightActiveBlock(){
         Block b = blocks.get(blocks.size()-1);
         if(!b.isMoving()){
             return;
@@ -94,9 +116,12 @@ public class GridManager {
             for(int i = 0;i<newTiles.size();i++){
                 newTiles.get(i).addBlock(b);
             }
+            int newRotationX = b.getRotationStart().getX()+1;
+            int newRotationY = b.getRotationStart().getY();
+            b.setRotationStart(new Tile(newRotationX,newRotationY));
         }
     }
-    public void moveLeftActiveBlock(){
+    public synchronized void moveLeftActiveBlock(){
         Block b = blocks.get(blocks.size()-1);
         if(!b.isMoving()){
             return;
@@ -123,12 +148,15 @@ public class GridManager {
                 newTiles.get(i).addBlock(b);
             }
 
+            int newRotationX = b.getRotationStart().getX()-1;
+            int newRotationY = b.getRotationStart().getY();
+            b.setRotationStart(new Tile(newRotationX,newRotationY));
+
         }
 
 
     }
-    
-    public void moveDownActiveBlock(){
+    public synchronized void moveDownActiveBlock(){
         // TODO: Make sure that it only gets the right block
         Block b = blocks.get(blocks.size()-1);
         // System.out.println("TRYING TO MOVE DOWN");
@@ -153,7 +181,6 @@ public class GridManager {
                 int y = t.getY();
                 t.removeBlock();
 
-                // System.out.println("x "+x+" y "+y);
 
                 // adding tile to block
                 b.addTile(grid[x][y+1]);
@@ -162,10 +189,13 @@ public class GridManager {
             for(int i = 0;i<newTiles.size();i++){
                 newTiles.get(i).addBlock(b);
             }
+            int newRotationX = b.getRotationStart().getX();
+            int newRotationY = b.getRotationStart().getY()+1;
+            b.setRotationStart(new Tile(newRotationX,newRotationY));
+
 
         }
     }
-    
     public boolean collision(char direction, Block b){
         if(direction=='d'){
             // System.out.println("Checking for collision");
@@ -262,6 +292,9 @@ public class GridManager {
                     for(int changeY = y-1;changeY>=0;changeY--){
                         for(int x = 0;x<Var.gridWidth;x++){
                             grid[x][changeY+1] = grid[x][changeY];
+                            grid[x][changeY+1].setXY(x,changeY+1);
+
+                            grid[x][changeY] = new Tile(x,changeY);
                         }
     
                     }
@@ -275,4 +308,50 @@ public class GridManager {
 
     }
 
+    public synchronized void rotateActiveBlock(){
+        // get the rotation start, and the size of the rotation matrix
+        Block b = blocks.get(blocks.size()-1);
+        int rotationStartX = b.getRotationStart().getX();
+        int rotationStartY = b.getRotationStart().getY();
+
+        int rotationSize;
+        System.out.println(b.getType());
+        if(b.getType()=='l'){
+            rotationSize=4;
+            System.out.println("Rotating an l");
+        }else if(b.getType()=='o'){
+            rotationSize=2;
+        }else{
+            rotationSize=3;
+        }
+        Tile[][] initialMatrix = new Tile[rotationSize][rotationSize];
+        
+        
+        // TODO: make sure that if rotationStartX is off the screen it moves it over or something
+        // this will have null pointers for sure rn
+        for(int x =0 ;x<initialMatrix.length;x++){
+            for(int y = 0;y<initialMatrix[x].length;y++){
+                // are they all intertwined?
+                initialMatrix[x][y] = grid[x+rotationStartX][y+rotationStartY];
+            }
+        }
+
+        // now rotate the matrix
+        // TODO: need to make sure that there are no collisions and that it doesnt move blocks that are already set in stone
+        b.clearTiles();
+        for(int x = 0;x<initialMatrix.length;x++){
+            for(int y = 0;y<initialMatrix[x].length;y++){
+                // make a copy of the tile?
+                Tile t = initialMatrix[x][y];
+                if(t.containsBlock()){
+                    if(t.getBlock().equals(b)){
+                        b.addTile(t);
+                    }
+                }
+                t.setXY(rotationStartX+initialMatrix.length-1-y,rotationStartY+x);
+                grid[rotationStartX+initialMatrix.length-1-y][rotationStartY+x] = t;
+
+            }
+        }
+    }
 }

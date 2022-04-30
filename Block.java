@@ -6,6 +6,7 @@ public class Block {
     private DLList<Tile> tiles = new DLList<Tile>();
     private int id;
     private boolean moving;
+    private Tile rotationStart;
     public Block(char type, int id){
         this.id = id;
         if(type=='s'){
@@ -30,6 +31,7 @@ public class Block {
         if(type=='t'){
             color = Color.MAGENTA;
         }
+        this.type = type;
     }
     public Color getColor(){
         return this.color;
@@ -45,6 +47,15 @@ public class Block {
     }
     public void addTile(Tile t){
         tiles.add(t);
+    }
+    public void setRotationStart(Tile t){
+        this.rotationStart = t;
+    }
+    public Tile getRotationStart(){
+        return this.rotationStart;
+    }
+    public char getType(){
+        return this.type;
     }
     public void clearTiles(){
         // very important to instantiate a new array
