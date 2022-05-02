@@ -28,10 +28,10 @@ public class GridManager {
     public void createBlock(){
         System.out.println("CREATED A BLOCK");
         // let's just create an l block for now
-        int random = (int)(Math.random()*3);
+        int random = (int)(Math.random()*7);
         if(random==0){
 
-            Block b = new Block('l',blockNum);
+            Block b = new Block('i',blockNum);
             blockNum++;
             blocks.add(b);
             b.setMoving(true);
@@ -66,7 +66,7 @@ public class GridManager {
             b.addTile(grid[5][1]);
 
             b.setRotationStart(new Tile(4,0));
-        }else{
+        }else if(random==2){
             Block b = new Block('t',blockNum);
             blockNum++;
             blocks.add(b);
@@ -84,6 +84,75 @@ public class GridManager {
 
             b.setRotationStart(new Tile(4,0));
 
+        }else if(random==3){
+            Block b = new Block('s', blockNum);
+            blockNum++;
+            blocks.add(b);
+            b.setMoving(true);
+
+            grid[5][0].addBlock(b);
+            grid[6][0].addBlock(b);
+            grid[4][1].addBlock(b);
+            grid[5][1].addBlock(b);
+
+            b.addTile(grid[5][0]);
+            b.addTile(grid[6][0]);
+            b.addTile(grid[4][1]);
+            b.addTile(grid[5][1]);
+
+            b.setRotationStart(new Tile(4,0));
+        }else if(random==4){
+            Block b = new Block('z', blockNum);
+            blockNum++;
+            blocks.add(b);
+            b.setMoving(true);
+
+            grid[5][0].addBlock(b);
+            grid[4][0].addBlock(b);
+            grid[6][1].addBlock(b);
+            grid[5][1].addBlock(b);
+
+            b.addTile(grid[5][0]);
+            b.addTile(grid[4][0]);
+            b.addTile(grid[6][1]);
+            b.addTile(grid[5][1]);
+
+            b.setRotationStart(new Tile(4,0));
+
+        }else if(random==5){
+            Block b = new Block('l', blockNum);
+            blockNum++;
+            blocks.add(b);
+            b.setMoving(true);
+
+            grid[6][1].addBlock(b);
+            grid[6][0].addBlock(b);
+            grid[4][1].addBlock(b);
+            grid[5][1].addBlock(b);
+
+            b.addTile(grid[6][1]);
+            b.addTile(grid[6][0]);
+            b.addTile(grid[4][1]);
+            b.addTile(grid[5][1]);
+
+            b.setRotationStart(new Tile(4,0));
+        }else if(random==6){
+            Block b = new Block('j', blockNum);
+            blockNum++;
+            blocks.add(b);
+            b.setMoving(true);
+
+            grid[4][0].addBlock(b);
+            grid[6][1].addBlock(b);
+            grid[4][1].addBlock(b);
+            grid[5][1].addBlock(b);
+
+            b.addTile(grid[4][0]);
+            b.addTile(grid[6][1]);
+            b.addTile(grid[4][1]);
+            b.addTile(grid[5][1]);
+
+            b.setRotationStart(new Tile(4,0));
         }
 
 
@@ -316,9 +385,8 @@ public class GridManager {
 
         int rotationSize;
         System.out.println(b.getType());
-        if(b.getType()=='l'){
+        if(b.getType()=='i'){
             rotationSize=4;
-            System.out.println("Rotating an l");
         }else if(b.getType()=='o'){
             rotationSize=2;
         }else{
@@ -332,7 +400,9 @@ public class GridManager {
         for(int x =0 ;x<initialMatrix.length;x++){
             for(int y = 0;y<initialMatrix[x].length;y++){
                 // are they all intertwined?
-                initialMatrix[x][y] = grid[x+rotationStartX][y+rotationStartY];
+                if(grid[x+rotationStartX][y+rotationStartY].containsBlock() && grid[x+rotationStartX][y+rotationStartY].getBlock().equals(b)){
+                    initialMatrix[x][y] = grid[x+rotationStartX][y+rotationStartY];
+                }
             }
         }
 
@@ -342,6 +412,9 @@ public class GridManager {
         for(int x = 0;x<initialMatrix.length;x++){
             for(int y = 0;y<initialMatrix[x].length;y++){
                 // make a copy of the tile?
+                if(initialMatrix[x][y]==null){
+                    continue;
+                }
                 Tile t = initialMatrix[x][y];
                 if(t.containsBlock()){
                     if(t.getBlock().equals(b)){
@@ -350,6 +423,7 @@ public class GridManager {
                 }
                 t.setXY(rotationStartX+initialMatrix.length-1-y,rotationStartY+x);
                 grid[rotationStartX+initialMatrix.length-1-y][rotationStartY+x] = t;
+                grid[rotationStartX+x][rotationStartY+y] = new Tile(rotationStartX+x,rotationStartY+y);
 
             }
         }

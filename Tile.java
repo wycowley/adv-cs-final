@@ -23,15 +23,15 @@ public class Tile{
             g.setColor(block.getColor());
             g.fillRect(x,y,Var.widthBlock,Var.heightBlock);
 
-            g.setColor(Color.BLACK);
-            g.drawRect(x,y,Var.widthBlock,Var.heightBlock);
+            // g.setColor(new Color(0f,0f,0f,.5f));
+            // g.drawRect(x,y,Var.widthBlock,Var.heightBlock);
 
         }else{
-            g.setColor(Color.GRAY);
+            g.setColor(Color.BLACK);
             g.fillRect(x,y,Var.widthBlock,Var.heightBlock);
 
-            g.setColor(Color.BLACK);
-            g.drawRect(x,y,Var.widthBlock,Var.heightBlock);
+            // g.setColor(new Color(0f,0f,0f,.5f));
+            // g.drawRect(x,y,Var.widthBlock,Var.heightBlock);
 
         }
     }
