@@ -2,6 +2,7 @@ import java.awt.*;
 public class GridManager {
     private Tile[][] grid = new Tile[Var.gridWidth][Var.gridHeight];
     private DLList<Block> blocks = new DLList<Block>();
+    private DLList<Block> futureBlocks = new DLList<Block>();
     private int blockNum = 0;
     public GridManager(){
         for(int i = 0;i<grid.length;i++){
@@ -13,25 +14,54 @@ public class GridManager {
     
     
     public void drawMe(Graphics g, int initX, int initY){
+        
         int x = initX;
         int y = initY;
         for(int i = 0;i<grid.length;i++){
             for(int j = 0;j<grid[i].length;j++){
                 grid[i][j].drawMe(g,x,y);
-                y+=Var.widthBlock;
+                y+=Var.heightBlock;
             }
-            x+=Var.heightBlock;
+            x+=Var.widthBlock;
             y = initX;
 
         }
     }
+    public DLList<Block> getFutureBlocks(){
+        return this.futureBlocks;
+    }
+    public void createBlockInQueue(){
+        int random = (int)(Math.random()*7);
+        if(random==0){
+            futureBlocks.add(new Block('i',blockNum));
+        }
+        if(random==1){
+            futureBlocks.add(new Block('o',blockNum));
+        }
+        if(random==2){
+            futureBlocks.add(new Block('t',blockNum));
+        }
+        if(random==3){
+            futureBlocks.add(new Block('s',blockNum));
+        }
+        if(random==4){
+            futureBlocks.add(new Block('z',blockNum));
+        }
+        if(random==5){
+            futureBlocks.add(new Block('l',blockNum));
+        }
+        if(random==6){
+            futureBlocks.add(new Block('j',blockNum));
+        }
+        blockNum++;
+    }
     public void createBlock(){
         System.out.println("CREATED A BLOCK");
         // let's just create an l block for now
-        int random = (int)(Math.random()*7);
-        if(random==0){
+        Block b = futureBlocks.get(0);
+        futureBlocks.remove(0);
+        if(b.getType()=='i'){
 
-            Block b = new Block('i',blockNum);
             blockNum++;
             blocks.add(b);
             b.setMoving(true);
@@ -49,8 +79,7 @@ public class GridManager {
             
             b.setRotationStart(new Tile(3,-1));
 
-        }else if(random==1){
-            Block b = new Block('o',blockNum);
+        }else if(b.getType()=='o'){
             blockNum++;
             blocks.add(b);
             b.setMoving(true);
@@ -66,8 +95,7 @@ public class GridManager {
             b.addTile(grid[5][1]);
 
             b.setRotationStart(new Tile(4,0));
-        }else if(random==2){
-            Block b = new Block('t',blockNum);
+        }else if(b.getType()=='t'){
             blockNum++;
             blocks.add(b);
             b.setMoving(true);
@@ -84,8 +112,7 @@ public class GridManager {
 
             b.setRotationStart(new Tile(4,0));
 
-        }else if(random==3){
-            Block b = new Block('s', blockNum);
+        }else if(b.getType()=='s'){
             blockNum++;
             blocks.add(b);
             b.setMoving(true);
@@ -101,8 +128,7 @@ public class GridManager {
             b.addTile(grid[5][1]);
 
             b.setRotationStart(new Tile(4,0));
-        }else if(random==4){
-            Block b = new Block('z', blockNum);
+        }else if(b.getType()=='l'){
             blockNum++;
             blocks.add(b);
             b.setMoving(true);
@@ -119,8 +145,7 @@ public class GridManager {
 
             b.setRotationStart(new Tile(4,0));
 
-        }else if(random==5){
-            Block b = new Block('l', blockNum);
+        }else if(b.getType()=='j'){
             blockNum++;
             blocks.add(b);
             b.setMoving(true);
@@ -136,8 +161,7 @@ public class GridManager {
             b.addTile(grid[5][1]);
 
             b.setRotationStart(new Tile(4,0));
-        }else if(random==6){
-            Block b = new Block('j', blockNum);
+        }else if(b.getType()=='z'){
             blockNum++;
             blocks.add(b);
             b.setMoving(true);
@@ -154,6 +178,7 @@ public class GridManager {
 
             b.setRotationStart(new Tile(4,0));
         }
+        this.createBlockInQueue();
 
 
 
@@ -376,7 +401,54 @@ public class GridManager {
         }
 
     }
+    // returns if the player has lost due to this adding of blocks
+    public boolean addRows(int numRows){
+        // start from the bottom
 
+        int randomNum = (int)(Math.random()*Var.gridWidth);
+        int rowToStart = Var.gridHeight-numRows;
+
+        Block fakeBlock = new Block('x',blockNum);
+        blockNum++;
+
+        // TODO:  MAKE IT SO THAT THE MOVING BLOCK DOESNT GET MOVED UP UGHHHH
+        for(int y=0;y<Var.gridHeight;y++){
+            for(int x=0;x<Var.gridWidth;x++){
+                if(!grid[x][y].containsBlock() && y<rowToStart){
+                    continue;
+                }
+                System.out.println("BUMPS INTO THE CEILING!  DEAD");
+                if(y-numRows<0)
+                    return true;
+                
+                grid[x][y-numRows] = grid[x][y];
+                grid[x][y-numRows].setXY(x,y-numRows);
+                grid[x][y] = new Tile(x,y);
+
+                if(y>=rowToStart){
+
+                    if(x==randomNum){
+                        grid[x][y] = new Tile(x,y);
+                    }else{
+                        System.out.println("Adding fake block to "+x+","+y);
+                        grid[x][y] = new Tile(x,y);
+                        grid[x][y].addBlock(fakeBlock);
+                    }
+    
+                }
+                
+            }
+        }
+        this.alignAllCoords();
+        return false;
+    }
+    private void alignAllCoords(){
+        for(int y=0;y<Var.gridHeight;y++){
+            for(int x=0;x<Var.gridWidth;x++){
+                grid[x][y].setXY(x,y);
+            }
+        }
+    }
     public synchronized void rotateActiveBlock(){
         // get the rotation start, and the size of the rotation matrix
         Block b = blocks.get(blocks.size()-1);
@@ -397,12 +469,18 @@ public class GridManager {
         
         // TODO: make sure that if rotationStartX is off the screen it moves it over or something
         // this will have null pointers for sure rn
+        if(rotationStartX+rotationSize>Var.gridWidth){
+            rotationStartX = Var.gridWidth-rotationSize;
+        }
+        if(rotationStartX<0){
+            rotationStartX = 0;
+        }
         for(int x =0 ;x<initialMatrix.length;x++){
             for(int y = 0;y<initialMatrix[x].length;y++){
                 // are they all intertwined?
-                if(grid[x+rotationStartX][y+rotationStartY].containsBlock() && grid[x+rotationStartX][y+rotationStartY].getBlock().equals(b)){
+                // if(grid[x+rotationStartX][y+rotationStartY].containsBlock() && grid[x+rotationStartX][y+rotationStartY].getBlock().equals(b)){
                     initialMatrix[x][y] = grid[x+rotationStartX][y+rotationStartY];
-                }
+                // }
             }
         }
 
@@ -423,7 +501,7 @@ public class GridManager {
                 }
                 t.setXY(rotationStartX+initialMatrix.length-1-y,rotationStartY+x);
                 grid[rotationStartX+initialMatrix.length-1-y][rotationStartY+x] = t;
-                grid[rotationStartX+x][rotationStartY+y] = new Tile(rotationStartX+x,rotationStartY+y);
+                // grid[rotationStartX+x][rotationStartY+y] = new Tile(rotationStartX+x,rotationStartY+y);
 
             }
         }

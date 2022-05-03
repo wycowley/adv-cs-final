@@ -20,8 +20,18 @@ public class Tile{
 
     public void drawMe(Graphics g, int x, int y){
         if(block != null){
+            g.setColor(block.getColor().brighter());
+            g.fillRect(x+3,y,Var.widthBlock-3,3);
+            g.fillRect(x,y,3,Var.heightBlock);
+
+            g.setColor(block.getColor().darker());
+            g.fillRect(x,y+Var.heightBlock-3,Var.widthBlock,3);
+            g.fillRect(x+Var.widthBlock-3,y,3,Var.heightBlock);
+
+
             g.setColor(block.getColor());
-            g.fillRect(x,y,Var.widthBlock,Var.heightBlock);
+            g.fillRect(x+3,y+3,Var.widthBlock-6,Var.heightBlock-6);
+            
 
             // g.setColor(new Color(0f,0f,0f,.5f));
             // g.drawRect(x,y,Var.widthBlock,Var.heightBlock);

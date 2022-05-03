@@ -8,12 +8,14 @@ import javax.swing.JTextField;
 
 
 public class Screen extends JPanel implements ActionListener, KeyListener {
-    private String name = "";
     private GridManager grid;
-    private int blocknum = 0;
     public Screen() {
         this.setLayout(null);
         grid = new GridManager();
+        grid.createBlockInQueue();
+        grid.createBlockInQueue();
+        grid.createBlockInQueue();
+
         grid.createBlock();
         this.setFocusable(true);
 
@@ -24,12 +26,17 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
 
     public Dimension getPreferredSize() {
         //Sets the size of the panel
-        return new Dimension(340,640);
+        return new Dimension(460,640);
     }
 
     public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		
+        DLList<Block> futureBlocks = grid.getFutureBlocks();
+
+        for(int i = 0;i<futureBlocks.size();i++){
+            futureBlocks.get(i).drawMe(g,360,20+i*Var.gridHeight*4);
+        }
         grid.drawMe(g,20,20);
     }
 
@@ -44,7 +51,9 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
             }catch(Exception e){
                 e.printStackTrace();
             }
-            grid.moveDownActiveBlock();
+            if(!Var.debug){
+                grid.moveDownActiveBlock();
+            }
             if(!grid.isMoving()){
                 System.out.println("CREATING NEW BLOCK");
                 grid.createBlock();
@@ -86,6 +95,9 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
         }
         if(e.getKeyCode()==38){
             grid.rotateActiveBlock();
+        }
+        if(e.getKeyCode()==84){
+            grid.addRows((int)(Math.random()*3)+1);
         }
         repaint();
     }
