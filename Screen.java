@@ -68,25 +68,10 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
                 grid.moveDownActiveBlock();
             }
             if(Var.networking && pin != null){
-                try {
-                    if(pin.available()!=0){
-                        String message = in.readLine();
-                        if(message.contains("lines")){
-                            char linesToAdd = message.charAt(message.indexOf("lines")+5);
-                            queuedRows += Character.getNumericValue(linesToAdd);
-                        }
-                        if(message.contains("uid")){
-                            this.handleNewGrid(message);
-                        }
-                    }
-                    
-                } catch (IOException e) {
-                    //TODO: handle exception
-                    System.out.println("ISSUE WITH SEEING IF THERE IS SOMETHING IN INPUT STREAM");
-                    System.out.println(e);
-                }
-
+                this.readInputStream();
             }
+            this.sendGrid();
+
             if(!grid.isMoving()){
                 System.out.println("CREATING NEW BLOCK");
                 if(grid.getClearedRows()!=0){
@@ -96,7 +81,6 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
                     grid.addRows(queuedRows);
                     queuedRows = 0;
                 }
-                this.sendGrid();
                 grid.createBlock();
 
             }
@@ -190,6 +174,26 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
     private void sendGrid(){
         String toSend = "uid"+uid+" "+grid.toString();
         out.println(toSend);
+    }
+    private void readInputStream(){
+        try {
+            while(pin.available()!=0){
+                String message = in.readLine();
+                if(message.contains("lines")){
+                    char linesToAdd = message.charAt(message.indexOf("lines")+5);
+                    queuedRows += Character.getNumericValue(linesToAdd);
+                }
+                if(message.contains("uid")){
+                    this.handleNewGrid(message);
+                }
+            }
+            
+        } catch (IOException e) {
+            //TODO: handle exception
+            System.out.println("ISSUE WITH SEEING IF THERE IS SOMETHING IN INPUT STREAM");
+            System.out.println(e);
+        }
+
     }
 
 
