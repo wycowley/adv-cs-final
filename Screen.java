@@ -13,6 +13,10 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
     private BufferedReader in;
     private PrintWriter out;
     private PushbackInputStream pin;
+    private int uid = (int)(Math.random()*90000)+10000;
+    private int queuedRows;
+    private DLList<OpponentGrid> opponentGrids = new DLList<OpponentGrid>();
+
     public Screen() {
         this.setLayout(null);
         grid = new GridManager();
@@ -66,7 +70,29 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
                         System.out.println(message);
                         if(message.contains("lines")){
                             char linesToAdd = message.charAt(message.indexOf("lines")+5);
-                            grid.addRows(Character.getNumericValue(linesToAdd));
+                            queuedRows += Character.getNumericValue(linesToAdd);
+                        }
+                        if(message.contains("uid")){
+                            String excludingUid = message.substring(message.indexOf("uid")+3);
+                            int uid = Integer.parseInt(excludingUid.split("\n")[0]);
+
+                            // go through dllist of opponent grids and find the one with the uid
+                            // update the data then!
+                            boolean found = false;
+                            for(int i = 0;i<opponentGrids.size();i++){
+                                if(opponentGrids.get(i).getUid()==uid){
+                                    opponentGrids.get(i).setData(message.substring(message.indexOf("\n")+1));
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if(!found){
+                                System.out.println("There's a new user that has entered!  Hooray!");
+                                OpponentGrid newGrid = new OpponentGrid();
+                                newGrid.setData(message.substring(message.indexOf("\n")+1));
+                                newGrid.setUid(uid);
+                                opponentGrids.add(newGrid);
+                            }
                         }
                     }
                     
@@ -79,6 +105,13 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
             }
             if(!grid.isMoving()){
                 System.out.println("CREATING NEW BLOCK");
+                if(grid.getClearedRows()!=0){
+                    out.println("lines"+grid.getClearedRows());
+                }
+                if(queuedRows>0){
+                    grid.addRows(queuedRows);
+                    queuedRows = 0;
+                }
                 grid.createBlock();
             }
             this.repaint();
@@ -137,10 +170,11 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
         }
 
         if(e.getKeyCode()==84){
-            if(Var.networking){
-                System.out.println("TRYING TO SEND IT");
-                out.println("lines2");
-            }
+            queuedRows++;
+            // if(Var.networking){
+            //     System.out.println("TRYING TO SEND IT");
+            //     out.println("lines2");
+            // }
         }
         repaint();
     }

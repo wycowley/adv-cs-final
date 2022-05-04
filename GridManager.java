@@ -4,6 +4,7 @@ public class GridManager {
     private DLList<Block> blocks = new DLList<Block>();
     private DLList<Block> futureBlocks = new DLList<Block>();
     private int blockNum = 0;
+    private int rowsCleared = 0; 
     public GridManager(){
         for(int i = 0;i<grid.length;i++){
             for(int j = 0;j<grid[i].length;j++){
@@ -372,6 +373,7 @@ public class GridManager {
             // TODO: make this more efficient, checking only the rows that were just added to
             
             // starts from bottom goes to top
+            rowsCleared =0;
             for(int y = Var.gridHeight-1;y>=0;y--){
                 boolean fullRow = true;
                 for(int x = 0;x<Var.gridWidth;x++){
@@ -383,6 +385,7 @@ public class GridManager {
                 // we'll just get rid of it for now
                 if(fullRow){
                     // get everything above it??
+                    rowsCleared++;
                     for(int changeY = y-1;changeY>=0;changeY--){
                         for(int x = 0;x<Var.gridWidth;x++){
                             grid[x][changeY+1] = grid[x][changeY];
@@ -408,6 +411,8 @@ public class GridManager {
         int randomNum = (int)(Math.random()*Var.gridWidth);
         int rowToStart = Var.gridHeight-numRows;
 
+        blockNum++;
+
         Block fakeBlock = new Block('x',blockNum);
         blockNum++;
 
@@ -418,9 +423,13 @@ public class GridManager {
                     continue;
                 }
                 System.out.println("BUMPS INTO THE CEILING!  DEAD");
-                if(y-numRows<0)
+                // if a block that isn't moving touches the ceiling, you are dead!
+                if(y-numRows<0 && grid[x][y].containsBlock() && !grid[x][y].getBlock().isMoving())
                     return true;
                 
+
+                if(y-numRows<0 && grid[x][y].containsBlock())
+                    continue;
                 grid[x][y-numRows] = grid[x][y];
                 grid[x][y-numRows].setXY(x,y-numRows);
                 grid[x][y] = new Tile(x,y);
@@ -439,7 +448,7 @@ public class GridManager {
                 
             }
         }
-        this.alignAllCoords();
+        // this.alignAllCoords();
         return false;
     }
     private void alignAllCoords(){
@@ -505,5 +514,21 @@ public class GridManager {
 
             }
         }
+    }
+    public int getClearedRows(){
+        int cleared = rowsCleared;
+        
+        return cleared;
+
+    }
+    public String toString(){
+        String s = "";
+        for(int y = 0;y<Var.gridHeight;y++){
+            for(int x = 0;x<Var.gridWidth;x++){
+                s+=grid[x][y].toString();
+            }
+            s+="\n";
+        }
+        return s;
     }
 }

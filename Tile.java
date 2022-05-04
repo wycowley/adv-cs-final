@@ -32,6 +32,11 @@ public class Tile{
             g.setColor(block.getColor());
             g.fillRect(x+3,y+3,Var.widthBlock-6,Var.heightBlock-6);
             
+            if(Var.debug){
+                g.setColor(Color.WHITE);
+                g.drawString(""+this.x+","+this.y,x+2,y+Var.heightBlock/2+5);
+            }
+
 
             // g.setColor(new Color(0f,0f,0f,.5f));
             // g.drawRect(x,y,Var.widthBlock,Var.heightBlock);
@@ -39,6 +44,11 @@ public class Tile{
         }else{
             g.setColor(Color.BLACK);
             g.fillRect(x,y,Var.widthBlock,Var.heightBlock);
+
+            if(Var.debug){
+                g.setColor(Color.WHITE);
+                g.drawString(""+this.x+","+this.y,x+2,y+Var.heightBlock/2+5);
+            }
 
             // g.setColor(new Color(0f,0f,0f,.5f));
             // g.drawRect(x,y,Var.widthBlock,Var.heightBlock);
@@ -61,5 +71,11 @@ public class Tile{
     }
     public Block getBlock(){
         return this.block;
+    }
+    public String toString(){
+        if(this.containsBlock){
+            return this.block.getType()+"";
+        }
+        return "e";
     }
 }
