@@ -30,7 +30,7 @@ public class ServerThread implements Runnable{
             try {
                 
                 String message = in.readLine();
-                System.out.println("READING MESSAGE: "+message);
+                // System.out.println("READING MESSAGE: "+message);
                 manager.update(message, this);
             } catch (Exception e) {
                 System.out.println(e);

@@ -34,7 +34,7 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
 
     public Dimension getPreferredSize() {
         //Sets the size of the panel
-        return new Dimension(460,640);
+        return new Dimension(640,640);
     }
 
     public void paintComponent(Graphics g) {
@@ -43,9 +43,13 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
         DLList<Block> futureBlocks = grid.getFutureBlocks();
 
         for(int i = 0;i<futureBlocks.size();i++){
-            futureBlocks.get(i).drawMe(g,360,20+i*Var.gridHeight*4);
+            futureBlocks.get(i).drawMe(g,340,20+i*Var.gridHeight*4);
         }
         grid.drawMe(g,20,20);
+
+        for(int i = 0;i<opponentGrids.size();i++){
+            opponentGrids.get(i).drawMe(g,340+Var.opponentWidthBlock*Var.gridWidth*i+20*i,640-20-Var.opponentHeightBlock*Var.gridHeight);
+        }
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -59,40 +63,20 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
             }catch(Exception e){
                 e.printStackTrace();
             }
+
             if(!Var.debug){
                 grid.moveDownActiveBlock();
             }
             if(Var.networking && pin != null){
-                System.out.println("LOOKING FOR A MESSAGE");
                 try {
                     if(pin.available()!=0){
                         String message = in.readLine();
-                        System.out.println(message);
                         if(message.contains("lines")){
                             char linesToAdd = message.charAt(message.indexOf("lines")+5);
                             queuedRows += Character.getNumericValue(linesToAdd);
                         }
                         if(message.contains("uid")){
-                            String excludingUid = message.substring(message.indexOf("uid")+3);
-                            int uid = Integer.parseInt(excludingUid.split("\n")[0]);
-
-                            // go through dllist of opponent grids and find the one with the uid
-                            // update the data then!
-                            boolean found = false;
-                            for(int i = 0;i<opponentGrids.size();i++){
-                                if(opponentGrids.get(i).getUid()==uid){
-                                    opponentGrids.get(i).setData(message.substring(message.indexOf("\n")+1));
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            if(!found){
-                                System.out.println("There's a new user that has entered!  Hooray!");
-                                OpponentGrid newGrid = new OpponentGrid();
-                                newGrid.setData(message.substring(message.indexOf("\n")+1));
-                                newGrid.setUid(uid);
-                                opponentGrids.add(newGrid);
-                            }
+                            this.handleNewGrid(message);
                         }
                     }
                     
@@ -112,7 +96,9 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
                     grid.addRows(queuedRows);
                     queuedRows = 0;
                 }
+                this.sendGrid();
                 grid.createBlock();
+
             }
             this.repaint();
             
@@ -178,7 +164,33 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
         }
         repaint();
     }
+    private void handleNewGrid(String message){
+        String excludingUid = message.substring(message.indexOf("uid")+3);
+        int uid = Integer.parseInt(excludingUid.split(" ")[0].trim());
 
+        // go through dllist of opponent grids and find the one with the uid
+        // update the data then!
+        boolean found = false;
+        for(int i = 0;i<opponentGrids.size();i++){
+            if(opponentGrids.get(i).getUid()==uid){
+                opponentGrids.get(i).setData(message.substring(message.indexOf(" ")+1));
+                found = true;
+                break;
+            }
+        }
+        if(!found){
+            System.out.println("There's a new user that has entered!  Hooray!");
+            OpponentGrid newGrid = new OpponentGrid();
+            newGrid.setData(message.substring(message.indexOf(" ")+1));
+            newGrid.setUid(uid);
+            opponentGrids.add(newGrid);
+        }
+
+    }
+    private void sendGrid(){
+        String toSend = "uid"+uid+" "+grid.toString();
+        out.println(toSend);
+    }
 
 
 }

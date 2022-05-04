@@ -527,7 +527,7 @@ public class GridManager {
             for(int x = 0;x<Var.gridWidth;x++){
                 s+=grid[x][y].toString();
             }
-            s+="\n";
+            s+=" ";
         }
         return s;
     }

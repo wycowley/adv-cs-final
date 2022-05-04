@@ -25,9 +25,9 @@ public class OpponentGrid {
     }
 
     public void drawMe(Graphics g, int x, int y){
-        String[] rows = data.split("\n");
+        String[] rows = data.split(" ");
         for(int i = 0;i<rows.length;i++){
-            String[] tiles = rows[i].split("");
+            String[] tiles = rows[i].trim().split("");
             for(int j = 0;j<tiles.length;j++){
                 g.setColor(Color.BLACK);
                 if(tiles[j].charAt(0)=='s'){
