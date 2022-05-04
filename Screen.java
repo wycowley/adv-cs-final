@@ -5,10 +5,14 @@ import java.awt.event.*;
 import javax.swing.JButton;
 import javax.swing.JTextField;
 
-
+import java.io.*;
+import java.net.*;
 
 public class Screen extends JPanel implements ActionListener, KeyListener {
     private GridManager grid;
+    private BufferedReader in;
+    private PrintWriter out;
+    private PushbackInputStream pin;
     public Screen() {
         this.setLayout(null);
         grid = new GridManager();
@@ -54,6 +58,25 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
             if(!Var.debug){
                 grid.moveDownActiveBlock();
             }
+            if(Var.networking && pin != null){
+                System.out.println("LOOKING FOR A MESSAGE");
+                try {
+                    if(pin.available()!=0){
+                        String message = in.readLine();
+                        System.out.println(message);
+                        if(message.contains("lines")){
+                            char linesToAdd = message.charAt(message.indexOf("lines")+5);
+                            grid.addRows(Character.getNumericValue(linesToAdd));
+                        }
+                    }
+                    
+                } catch (IOException e) {
+                    //TODO: handle exception
+                    System.out.println("ISSUE WITH SEEING IF THERE IS SOMETHING IN INPUT STREAM");
+                    System.out.println(e);
+                }
+
+            }
             if(!grid.isMoving()){
                 System.out.println("CREATING NEW BLOCK");
                 grid.createBlock();
@@ -61,6 +84,22 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
             this.repaint();
             
         }
+    }
+    public void poll(){
+        String hostName = "localhost"; 
+		int portNumber = 3333;
+        Socket serverSocket;
+        try {
+            serverSocket = new Socket(hostName, portNumber);
+            out = new PrintWriter(serverSocket.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()));
+            pin = new PushbackInputStream(serverSocket.getInputStream());
+        } catch (IOException e) {
+            System.out.println("UNABLE TO CONNECT");
+            System.out.println(e);
+            //TODO: handle exception
+        }
+
     }
 
     @Override
@@ -96,8 +135,12 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
         if(e.getKeyCode()==38){
             grid.rotateActiveBlock();
         }
+
         if(e.getKeyCode()==84){
-            grid.addRows((int)(Math.random()*3)+1);
+            if(Var.networking){
+                System.out.println("TRYING TO SEND IT");
+                out.println("lines2");
+            }
         }
         repaint();
     }

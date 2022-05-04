@@ -13,6 +13,7 @@ public class Runner {
         frame.pack();
         frame.setVisible(true);
 
+        sc.poll();
         sc.animate();
 
     }
