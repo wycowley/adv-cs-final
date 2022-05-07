@@ -74,8 +74,10 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
 
             if(!grid.isMoving()){
                 System.out.println("CREATING NEW BLOCK");
-                if(grid.getClearedRows()!=0){
-                    out.println("lines"+grid.getClearedRows());
+                if(Var.networking){
+                    if(grid.getClearedRows()!=0){
+                        out.println("lines"+grid.getClearedRows());
+                    }
                 }
                 if(queuedRows>0){
                     grid.addRows(queuedRows);
@@ -89,6 +91,9 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
         }
     }
     public void poll(){
+        if(!Var.networking){
+            return;
+        }
         String hostName = "localhost"; 
 		int portNumber = 3333;
         Socket serverSocket;
@@ -118,7 +123,7 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
     }
     @Override
     public void keyPressed(KeyEvent e){
-        System.out.println(e.getKeyCode());
+        // System.out.println(e.getKeyCode());
         // arrow left
         if(e.getKeyCode()==37){
             grid.moveLeftActiveBlock();
@@ -173,7 +178,10 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
     }
     private void sendGrid(){
         String toSend = "uid"+uid+" "+grid.toString();
-        out.println(toSend);
+        if(Var.networking){
+
+            out.println(toSend);
+        }
     }
     private void readInputStream(){
         try {

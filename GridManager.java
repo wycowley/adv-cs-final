@@ -32,28 +32,30 @@ public class GridManager {
         return this.futureBlocks;
     }
     public void createBlockInQueue(){
-        int random = (int)(Math.random()*7);
-        if(random==0){
-            futureBlocks.add(new Block('i',blockNum));
-        }
-        if(random==1){
-            futureBlocks.add(new Block('o',blockNum));
-        }
-        if(random==2){
-            futureBlocks.add(new Block('t',blockNum));
-        }
-        if(random==3){
-            futureBlocks.add(new Block('s',blockNum));
-        }
-        if(random==4){
-            futureBlocks.add(new Block('z',blockNum));
-        }
-        if(random==5){
-            futureBlocks.add(new Block('l',blockNum));
-        }
-        if(random==6){
-            futureBlocks.add(new Block('j',blockNum));
-        }
+        futureBlocks.add(new Block('o',blockNum));
+
+        // int random = (int)(Math.random()*7);
+        // if(random==0){
+        //     futureBlocks.add(new Block('i',blockNum));
+        // }
+        // if(random==1){
+        //     futureBlocks.add(new Block('o',blockNum));
+        // }
+        // if(random==2){
+        //     futureBlocks.add(new Block('t',blockNum));
+        // }
+        // if(random==3){
+        //     futureBlocks.add(new Block('s',blockNum));
+        // }
+        // if(random==4){
+        //     futureBlocks.add(new Block('z',blockNum));
+        // }
+        // if(random==5){
+        //     futureBlocks.add(new Block('l',blockNum));
+        // }
+        // if(random==6){
+        //     futureBlocks.add(new Block('j',blockNum));
+        // }
         blockNum++;
     }
     public void createBlock(){
@@ -459,13 +461,14 @@ public class GridManager {
         }
     }
     public synchronized void rotateActiveBlock(){
+        System.out.println("Rotated");
         // get the rotation start, and the size of the rotation matrix
         Block b = blocks.get(blocks.size()-1);
         int rotationStartX = b.getRotationStart().getX();
         int rotationStartY = b.getRotationStart().getY();
 
         int rotationSize;
-        System.out.println(b.getType());
+        // System.out.println(b.getType());
         if(b.getType()=='i'){
             rotationSize=4;
         }else if(b.getType()=='o'){
@@ -474,43 +477,84 @@ public class GridManager {
             rotationSize=3;
         }
         Tile[][] initialMatrix = new Tile[rotationSize][rotationSize];
-        
-        
-        // TODO: make sure that if rotationStartX is off the screen it moves it over or something
-        // this will have null pointers for sure rn
+    
+        // shifts the matrix over if on the edge
         if(rotationStartX+rotationSize>Var.gridWidth){
             rotationStartX = Var.gridWidth-rotationSize;
         }
         if(rotationStartX<0){
             rotationStartX = 0;
         }
+        // check if you are going to rotate into something
         for(int x =0 ;x<initialMatrix.length;x++){
             for(int y = 0;y<initialMatrix[x].length;y++){
-                // are they all intertwined?
-                // if(grid[x+rotationStartX][y+rotationStartY].containsBlock() && grid[x+rotationStartX][y+rotationStartY].getBlock().equals(b)){
-                    initialMatrix[x][y] = grid[x+rotationStartX][y+rotationStartY];
-                // }
+                
+                int initialX = x+rotationStartX;
+                int initialY = y+rotationStartY;
+                int rotatedX = rotationStartX+initialMatrix.length-1-y;
+                int rotatedY = rotationStartY+x;
+
+                // make a copy of the block value
+
+
+                // initialMatrix[x][y] = grid[initialX][initialY];
+
+
+
+    
+                if(grid[initialX][initialY].containsBlock()){
+                    // System.out.println("Contains Block");
+
+                    if(grid[initialX][initialY].getBlock().equals(b)){
+                        // System.out.println("Contains Correct Block");
+
+                        initialMatrix[x][y] = new Tile(initialX,initialY);
+                        initialMatrix[x][y].addBlock(grid[initialX][initialY].getBlock());
+        
+                        if(grid[rotatedX][rotatedY].containsBlock() && !grid[rotatedX][rotatedY].getBlock().equals(b)){
+                            // System.out.println("Rotating into a block");
+                            return;
+                        }
+                    }
+                }
             }
         }
 
         // now rotate the matrix
         // TODO: need to make sure that there are no collisions and that it doesnt move blocks that are already set in stone
         b.clearTiles();
+        DLList<Coord> coords = new DLList<Coord>();
         for(int x = 0;x<initialMatrix.length;x++){
             for(int y = 0;y<initialMatrix[x].length;y++){
                 // make a copy of the tile?
+
                 if(initialMatrix[x][y]==null){
                     continue;
                 }
                 Tile t = initialMatrix[x][y];
-                if(t.containsBlock()){
-                    if(t.getBlock().equals(b)){
-                        b.addTile(t);
-                    }
+                int rotatedX = rotationStartX+initialMatrix.length-1-y;
+                int rotatedY = rotationStartY+x;
+                int initialX = x+rotationStartX;
+                int initialY = y+rotationStartY;
+
+
+                b.addTile(t);
+                if(!coords.contains(new Coord(initialX,initialY))){
+                    grid[initialX][initialY] = new Tile(initialX,initialY);
+                    coords.add(new Coord(rotatedX,rotatedY));
+                }else{
+                    grid[initialX][initialY] = new Tile(initialX,initialY);
+                    grid[initialX][initialY].addBlock(b);
+                    System.out.println("Trying to replace something");
+                    coords.add(new Coord(rotatedX,rotatedY));
+
                 }
-                t.setXY(rotationStartX+initialMatrix.length-1-y,rotationStartY+x);
-                grid[rotationStartX+initialMatrix.length-1-y][rotationStartY+x] = t;
-                // grid[rotationStartX+x][rotationStartY+y] = new Tile(rotationStartX+x,rotationStartY+y);
+                        
+                
+                t.setXY(rotatedX,rotatedY);
+                System.out.println("Replacing "+initialX+","+initialY+" with "+rotatedX+","+rotatedY);
+                System.out.println("Contains block: "+t.containsBlock());
+                grid[rotatedX][rotatedY] = t;
 
             }
         }

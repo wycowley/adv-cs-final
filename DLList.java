@@ -20,6 +20,17 @@ public class DLList<E> {
         size = 0;
 
     }
+    public boolean contains(E e){
+        Node<E> current = head.next();
+        while(current != tail){
+            if(current.get().equals(e)){
+                return true;
+            }
+            current = current.next();
+        }
+
+        return false;
+    }
     private Node<E> getNode(int index){
         Node<E> current;
         

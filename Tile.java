@@ -10,7 +10,9 @@ public class Tile{
         this.y = y;
     }
     public void addBlock(Block block){
-        this.containsBlock = true;
+        if(block!=null){
+            this.containsBlock = true;
+        }
         this.block = block;
     }
     public void removeBlock(){
