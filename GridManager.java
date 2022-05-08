@@ -32,30 +32,30 @@ public class GridManager {
         return this.futureBlocks;
     }
     public void createBlockInQueue(){
-        futureBlocks.add(new Block('o',blockNum));
+        // futureBlocks.add(new Block('o',blockNum));
 
-        // int random = (int)(Math.random()*7);
-        // if(random==0){
-        //     futureBlocks.add(new Block('i',blockNum));
-        // }
-        // if(random==1){
-        //     futureBlocks.add(new Block('o',blockNum));
-        // }
-        // if(random==2){
-        //     futureBlocks.add(new Block('t',blockNum));
-        // }
-        // if(random==3){
-        //     futureBlocks.add(new Block('s',blockNum));
-        // }
-        // if(random==4){
-        //     futureBlocks.add(new Block('z',blockNum));
-        // }
-        // if(random==5){
-        //     futureBlocks.add(new Block('l',blockNum));
-        // }
-        // if(random==6){
-        //     futureBlocks.add(new Block('j',blockNum));
-        // }
+        int random = (int)(Math.random()*7);
+        if(random==0){
+            futureBlocks.add(new Block('i',blockNum));
+        }
+        if(random==1){
+            futureBlocks.add(new Block('o',blockNum));
+        }
+        if(random==2){
+            futureBlocks.add(new Block('t',blockNum));
+        }
+        if(random==3){
+            futureBlocks.add(new Block('s',blockNum));
+        }
+        if(random==4){
+            futureBlocks.add(new Block('z',blockNum));
+        }
+        if(random==5){
+            futureBlocks.add(new Block('l',blockNum));
+        }
+        if(random==6){
+            futureBlocks.add(new Block('j',blockNum));
+        }
         blockNum++;
     }
     public void createBlock(){
@@ -545,6 +545,7 @@ public class GridManager {
                 }else{
                     grid[initialX][initialY] = new Tile(initialX,initialY);
                     grid[initialX][initialY].addBlock(b);
+                    b.addTile(grid[initialX][initialY]);
                     System.out.println("Trying to replace something");
                     coords.add(new Coord(rotatedX,rotatedY));
 

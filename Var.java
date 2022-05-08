@@ -7,6 +7,6 @@ public class Var{
     public static final int opponentWidthBlock = 5;
     public static final int opponentHeightBlock = 5;
     
-    public static final boolean debug = true;
-    public static final boolean networking = false;
+    public static final boolean debug = false;
+    public static final boolean networking = true;
 }
