@@ -94,7 +94,7 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
         if(!Var.networking){
             return;
         }
-        String hostName = "localhost"; 
+        String hostName = "192.168.86.35"; 
 		int portNumber = 3333;
         Socket serverSocket;
         try {
