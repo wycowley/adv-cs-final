@@ -8,5 +8,5 @@ public class Var{
     public static final int opponentHeightBlock = 5;
     
     public static final boolean debug = false;
-    public static final boolean networking = true;
+    public static final boolean networking = false;
 }

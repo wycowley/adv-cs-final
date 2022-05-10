@@ -3,6 +3,8 @@ public class GridManager {
     private Tile[][] grid = new Tile[Var.gridWidth][Var.gridHeight];
     private DLList<Block> blocks = new DLList<Block>();
     private DLList<Block> futureBlocks = new DLList<Block>();
+    private Block storedBlock = null;
+    private boolean alreadyStored = false;
     private int blockNum = 0;
     private int rowsCleared = 0; 
     public GridManager(){
@@ -15,21 +17,55 @@ public class GridManager {
     
     
     public void drawMe(Graphics g, int initX, int initY){
-        
+        DLList<Tile> tiles = blocks.get(blocks.size()-1).getTiles();
+        int minX = tiles.get(0).getX();
+        int maxX= tiles.get(0).getX();
+
+        int minY = tiles.get(0).getY();
+        for(int i =0 ;i<tiles.size();i++){
+            minX = Math.min(minX, tiles.get(i).getX());
+            maxX = Math.max(maxX, tiles.get(i).getX());
+            minY = Math.max(minY, tiles.get(i).getY());
+        }
+
         int x = initX;
         int y = initY;
         for(int i = 0;i<grid.length;i++){
             for(int j = 0;j<grid[i].length;j++){
-                grid[i][j].drawMe(g,x,y);
+                grid[i][j].drawMe(g,x,y, i>=minX && i<=maxX && j>=minY,j-minY);
                 y+=Var.heightBlock;
             }
             x+=Var.widthBlock;
-            y = initX;
+            y = initY;
 
         }
     }
     public DLList<Block> getFutureBlocks(){
         return this.futureBlocks;
+    }
+    public void store(){
+        if(!alreadyStored){
+            alreadyStored = true;
+            DLList<Tile> tiles = blocks.get(blocks.size()-1).getTiles();
+
+            // removes the tile from the screen
+            for(int i = 0;i<tiles.size();i++){
+                grid[tiles.get(i).getX()][tiles.get(i).getY()].removeBlock();
+            }
+            if(storedBlock == null){
+                storedBlock = blocks.get(blocks.size()-1);
+                createBlockInQueue();
+                createBlock();
+            }else{
+                futureBlocks.add(new Block(storedBlock.getType(),blockNum),0);
+                blockNum++;
+                storedBlock = blocks.get(blocks.size()-1);
+                createBlock();
+            }
+        }
+    }
+    public Block getStoredBlock(){
+        return this.storedBlock;
     }
     public void createBlockInQueue(){
         // futureBlocks.add(new Block('o',blockNum));
@@ -181,7 +217,10 @@ public class GridManager {
 
             b.setRotationStart(new Tile(4,0));
         }
-        this.createBlockInQueue();
+        if(futureBlocks.size()<3){
+
+            this.createBlockInQueue();
+        }
 
 
 
@@ -375,6 +414,7 @@ public class GridManager {
             // TODO: make this more efficient, checking only the rows that were just added to
             
             // starts from bottom goes to top
+            alreadyStored = false;
             rowsCleared =0;
             for(int y = Var.gridHeight-1;y>=0;y--){
                 boolean fullRow = true;
@@ -501,7 +541,9 @@ public class GridManager {
 
 
 
-    
+                if(initialY<0 || initialY>=Var.gridHeight){
+                    return;
+                }
                 if(grid[initialX][initialY].containsBlock()){
                     // System.out.println("Contains Block");
 

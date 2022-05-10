@@ -8,7 +8,9 @@ import javax.swing.JTextField;
 import java.io.*;
 import java.net.*;
 
-public class Screen extends JPanel implements ActionListener, KeyListener {
+// import thread
+
+public class Screen extends JPanel implements ActionListener {
     private GridManager grid;
     private BufferedReader in;
     private PrintWriter out;
@@ -18,23 +20,32 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
     private DLList<OpponentGrid> opponentGrids = new DLList<OpponentGrid>();
 
     public Screen() {
+        new Input(this);
+
+
         this.setLayout(null);
         grid = new GridManager();
         grid.createBlockInQueue();
         grid.createBlockInQueue();
         grid.createBlockInQueue();
 
+
         grid.createBlock();
+
+        KeyboardThread keyManager = new KeyboardThread(grid, this);
+        Thread keyboardThread = new Thread(keyManager);
+        keyboardThread.start();
+
         this.setFocusable(true);
 
-        addKeyListener(this);
+
         
 
     }
 
     public Dimension getPreferredSize() {
         //Sets the size of the panel
-        return new Dimension(640,640);
+        return new Dimension(660,680);
     }
 
     public void paintComponent(Graphics g) {
@@ -43,12 +54,29 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
         DLList<Block> futureBlocks = grid.getFutureBlocks();
 
         for(int i = 0;i<futureBlocks.size();i++){
-            futureBlocks.get(i).drawMe(g,340,20+i*Var.gridHeight*4);
+            futureBlocks.get(i).drawMe(g,360,20+i*Var.gridHeight*4);
         }
-        grid.drawMe(g,20,20);
+        grid.drawMe(g,40,20);
 
         for(int i = 0;i<opponentGrids.size();i++){
-            opponentGrids.get(i).drawMe(g,340+Var.opponentWidthBlock*Var.gridWidth*i+20*i,640-20-Var.opponentHeightBlock*Var.gridHeight);
+            opponentGrids.get(i).drawMe(g,360+Var.opponentWidthBlock*Var.gridWidth*i+20*i,640-20-Var.opponentHeightBlock*Var.gridHeight);
+        }
+
+        // draw stored block
+        if(grid.getStoredBlock()!=null){
+            grid.getStoredBlock().drawMe(g,40,660-Var.heightBlock-5);
+        }
+
+        // draw queued blocks
+        if(Var.networking){
+
+            g.setColor(new Color(210,210,210));
+            g.fillRect(10,20,20,Var.gridHeight*Var.heightBlock);
+            if(queuedRows>0){
+                // TODO: Change the color dynamically
+                g.setColor(Color.RED);
+                g.fillRect(10,20+Var.gridHeight*Var.heightBlock-queuedRows*Var.heightBlock,20,queuedRows*Var.heightBlock);
+            }
         }
     }
 
@@ -63,7 +91,7 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
             }catch(Exception e){
                 e.printStackTrace();
             }
-
+            
             if(!Var.debug){
                 grid.moveDownActiveBlock();
             }
@@ -75,13 +103,19 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
             if(!grid.isMoving()){
                 System.out.println("CREATING NEW BLOCK");
                 if(Var.networking){
-                    if(grid.getClearedRows()!=0){
+                    if(grid.getClearedRows()!=0 && queuedRows==0){
                         out.println("lines"+grid.getClearedRows());
                     }
                 }
                 if(queuedRows>0){
-                    grid.addRows(queuedRows);
-                    queuedRows = 0;
+                    if(grid.getClearedRows()!=0){
+                        queuedRows = Math.max(0,queuedRows-grid.getClearedRows()*2);
+                    }else{
+                        if(queuedRows>1){
+                            grid.addRows(queuedRows/2);
+                        }
+                        queuedRows = queuedRows%2;
+                    }
                 }
                 grid.createBlock();
 
@@ -94,7 +128,7 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
         if(!Var.networking){
             return;
         }
-        String hostName = "192.168.86.35"; 
+        String hostName = "10.210.71.146"; 
 		int portNumber = 3333;
         Socket serverSocket;
         try {
@@ -110,49 +144,9 @@ public class Screen extends JPanel implements ActionListener, KeyListener {
 
     }
 
-    @Override
-    public void keyTyped(KeyEvent e) {
-        // TODO Auto-generated method stub
-        
-    }
+    
 
-    @Override
-    public void keyReleased(KeyEvent e) {
-        // TODO Auto-generated method stub
-        
-    }
-    @Override
-    public void keyPressed(KeyEvent e){
-        // System.out.println(e.getKeyCode());
-        // arrow left
-        if(e.getKeyCode()==37){
-            grid.moveLeftActiveBlock();
-        }
-        // arrow right
-        if(e.getKeyCode()==39){
-            grid.moveRightActiveBlock();
-        }
-        if(e.getKeyCode()==40){
-            grid.moveDownActiveBlock();
-        }
-        if(e.getKeyCode()==32){
-            while(grid.isMoving()){
-                grid.moveDownActiveBlock();
-            }
-        }
-        if(e.getKeyCode()==38){
-            grid.rotateActiveBlock();
-        }
-
-        if(e.getKeyCode()==84){
-            queuedRows++;
-            // if(Var.networking){
-            //     System.out.println("TRYING TO SEND IT");
-            //     out.println("lines2");
-            // }
-        }
-        repaint();
-    }
+    
     private void handleNewGrid(String message){
         String excludingUid = message.substring(message.indexOf("uid")+3);
         int uid = Integer.parseInt(excludingUid.split(" ")[0].trim());

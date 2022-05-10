@@ -20,7 +20,7 @@ public class Tile{
         this.block = null;
     }
 
-    public void drawMe(Graphics g, int x, int y){
+    public void drawMe(Graphics g, int x, int y, boolean highlighted, int distFromBlock){
         if(block != null){
             g.setColor(block.getColor().brighter());
             g.fillRect(x+3,y,Var.widthBlock-3,3);
@@ -44,7 +44,12 @@ public class Tile{
             // g.drawRect(x,y,Var.widthBlock,Var.heightBlock);
 
         }else{
-            g.setColor(Color.BLACK);
+            if(highlighted){
+                g.setColor(new Color(Math.max(20,40-distFromBlock*3),Math.max(20,40-distFromBlock*3),Math.max(20,40-distFromBlock*3)));
+            }else{
+
+                g.setColor(Color.BLACK);
+            }
             g.fillRect(x,y,Var.widthBlock,Var.heightBlock);
 
             if(Var.debug){
