@@ -14,7 +14,6 @@ public class KeyboardThread implements Runnable{
     public void run(){
         while(true){
             if(Input.keyboard[37]){
-                System.out.println("hello");
                 grid.moveLeftActiveBlock();
                 sc.repaint();
                 try {

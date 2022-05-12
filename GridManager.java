@@ -7,6 +7,7 @@ public class GridManager {
     private boolean alreadyStored = false;
     private int blockNum = 0;
     private int rowsCleared = 0; 
+    private boolean gameOver = false;
     public GridManager(){
         for(int i = 0;i<grid.length;i++){
             for(int j = 0;j<grid[i].length;j++){
@@ -14,8 +15,12 @@ public class GridManager {
             }
         }
     }
-    
-    
+    public void gameOver(){
+        gameOver = true;
+    }
+    public Block getActiveBlock(){
+        return blocks.get(blocks.size()-1);
+    }
     public void drawMe(Graphics g, int initX, int initY){
         DLList<Tile> tiles = blocks.get(blocks.size()-1).getTiles();
         int minX = tiles.get(0).getX();
@@ -226,6 +231,8 @@ public class GridManager {
 
     }
     public synchronized void moveRightActiveBlock(){
+        if(gameOver)
+            return;
         Block b = blocks.get(blocks.size()-1);
         if(!b.isMoving()){
             return;
@@ -258,6 +265,8 @@ public class GridManager {
         }
     }
     public synchronized void moveLeftActiveBlock(){
+        if(gameOver)
+            return;
         Block b = blocks.get(blocks.size()-1);
         if(!b.isMoving()){
             return;
@@ -293,6 +302,8 @@ public class GridManager {
 
     }
     public synchronized void moveDownActiveBlock(){
+        if(gameOver)
+            return;
         // TODO: Make sure that it only gets the right block
         Block b = blocks.get(blocks.size()-1);
         // System.out.println("TRYING TO MOVE DOWN");
@@ -448,6 +459,8 @@ public class GridManager {
     }
     // returns if the player has lost due to this adding of blocks
     public boolean addRows(int numRows){
+        if(gameOver)
+            return false;
         // start from the bottom
 
         int randomNum = (int)(Math.random()*Var.gridWidth);
@@ -501,6 +514,8 @@ public class GridManager {
         }
     }
     public synchronized void rotateActiveBlock(){
+        if(gameOver)
+            return;
         System.out.println("Rotated");
         // get the rotation start, and the size of the rotation matrix
         Block b = blocks.get(blocks.size()-1);
@@ -617,5 +632,9 @@ public class GridManager {
             s+=" ";
         }
         return s;
+    }
+
+    public boolean getGameOver(){
+        return gameOver;
     }
 }

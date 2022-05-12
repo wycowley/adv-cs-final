@@ -7,6 +7,7 @@ import javax.swing.JTextField;
 
 import java.io.*;
 import java.net.*;
+import javax.sound.sampled.*;
 
 // import thread
 
@@ -22,6 +23,7 @@ public class Screen extends JPanel implements ActionListener {
     public Screen() {
         new Input(this);
 
+        this.playSound("sound/tetris.wav", true);
 
         this.setLayout(null);
         grid = new GridManager();
@@ -49,17 +51,33 @@ public class Screen extends JPanel implements ActionListener {
     }
 
     public void paintComponent(Graphics g) {
-		super.paintComponent(g);
+        super.paintComponent(g);
+        g.setColor(Color.WHITE);
+        g.fillRect(0,0,1000,1000);
 		
-        DLList<Block> futureBlocks = grid.getFutureBlocks();
+        if(grid.getGameOver() && Var.networking){
+            for(int i = 0;i<opponentGrids.size();i++){
+                opponentGrids.get(i).drawMe(g,20+Var.opponentWidthBlock*Var.gridWidth*i+20*i,20);
+            }
+            return;
+        }
 
+        DLList<Block> futureBlocks = grid.getFutureBlocks();
         for(int i = 0;i<futureBlocks.size();i++){
             futureBlocks.get(i).drawMe(g,360,20+i*Var.gridHeight*4);
         }
+
+
+        
         grid.drawMe(g,40,20);
 
-        for(int i = 0;i<opponentGrids.size();i++){
-            opponentGrids.get(i).drawMe(g,360+Var.opponentWidthBlock*Var.gridWidth*i+20*i,640-20-Var.opponentHeightBlock*Var.gridHeight);
+        if(Var.networking){
+            if(!grid.getGameOver()){
+
+                for(int i = 0;i<opponentGrids.size();i++){
+                    opponentGrids.get(i).drawMe(g,360+Var.opponentWidthBlock*Var.gridWidth*i+20*i,640-20-Var.opponentHeightBlock*Var.gridHeight);
+                }
+            }
         }
 
         // draw stored block
@@ -83,6 +101,23 @@ public class Screen extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
 
     }
+    public void playSound(String fileName, boolean loop) {
+        if(Var.music==false){
+            return;
+        }
+        try {
+            URL url = this.getClass().getClassLoader().getResource(fileName);
+            Clip clip = AudioSystem.getClip();
+            clip.open(AudioSystem.getAudioInputStream(url));
+            clip.start();
+            if(loop){
+                clip.loop(Clip.LOOP_CONTINUOUSLY);
+            }
+
+        } catch (Exception exc) {
+            exc.printStackTrace(System.out);
+        }
+    }
     
     public void animate(){
         while(true){
@@ -102,6 +137,10 @@ public class Screen extends JPanel implements ActionListener {
 
             if(!grid.isMoving()){
                 System.out.println("CREATING NEW BLOCK");
+                if(grid.getClearedRows()!=0){
+                    playSound("sound/clear.wav", false);
+
+                }
                 if(Var.networking){
                     if(grid.getClearedRows()!=0 && queuedRows==0){
                         out.println("lines"+grid.getClearedRows());
@@ -109,6 +148,7 @@ public class Screen extends JPanel implements ActionListener {
                 }
                 if(queuedRows>0){
                     if(grid.getClearedRows()!=0){
+
                         queuedRows = Math.max(0,queuedRows-grid.getClearedRows()*2);
                     }else{
                         if(queuedRows>1){
@@ -118,6 +158,11 @@ public class Screen extends JPanel implements ActionListener {
                     }
                 }
                 grid.createBlock();
+                if(grid.collision('d',grid.getActiveBlock())){
+                    grid.gameOver();
+                    Var.opponentHeightBlock = 15;
+                    Var.opponentWidthBlock = 15;
+                }
 
             }
             this.repaint();
