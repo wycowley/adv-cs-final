@@ -36,7 +36,8 @@ public class Tile{
             
             if(Var.debug){
                 g.setColor(Color.WHITE);
-                g.drawString(""+this.x+","+this.y,x+2,y+Var.heightBlock/2+5);
+                // g.drawString(""+this.x+","+this.y,x+2,y+Var.heightBlock/2+5);
+                g.drawString(""+this.block.getType(),x+2,y+Var.heightBlock/2+5);
             }
 
 

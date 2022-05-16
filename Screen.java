@@ -19,7 +19,7 @@ public class Screen extends JPanel implements ActionListener {
     private KeyboardThread keyManager;
     private int uid = (int)(Math.random()*90000)+10000;
     private int queuedRows;
-
+    private int points;
 
     private boolean started = false;
     private boolean single = false;
@@ -162,6 +162,11 @@ public class Screen extends JPanel implements ActionListener {
                     opponentGrids.get(i).drawMe(g,360+Var.opponentWidthBlock*Var.gridWidth*i+20*i,640-20-Var.opponentHeightBlock*Var.gridHeight);
                 }
             }
+            
+        }else{
+            g.setFont(new Font("Arial", Font.PLAIN, 20));
+            g.setColor(Color.BLACK);
+            g.drawString(points+" points", Var.widthBlock*Var.gridWidth+60, Var.heightBlock*Var.gridHeight);
         }
 
         // draw stored block
@@ -216,13 +221,12 @@ public class Screen extends JPanel implements ActionListener {
                         continue;
                     }
                     if(pin.available()!=0){
-                        String thing = in.readLine();
-                        if(thing.equals("start")){
+                        String input = in.readLine();
+                        if(input.equals("start")){
                             Var.networking = true;
                             lobby = false;
     
                             this.startGame();
-    
                         }
                     }
                 } catch (IOException e) {
@@ -246,7 +250,22 @@ public class Screen extends JPanel implements ActionListener {
                 System.out.println("CREATING NEW BLOCK");
                 if(grid.getClearedRows()!=0){
                     playSound("sound/clear.wav", false);
-
+                    
+                    switch(grid.getClearedRows()){
+                        case 1:
+                            points+=40;
+                            break;
+                        case 2:
+                            points+=100;
+                            break;
+                        case 3:
+                            points+=300;
+                            break;
+                        case 4:
+                            points+=1200;
+                            break;
+                        
+                    }
                 }
                 if(Var.networking){
                     if(grid.getClearedRows()!=0 && queuedRows==0){

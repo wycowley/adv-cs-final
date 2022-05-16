@@ -75,37 +75,62 @@ public class Block {
 
     public void drawMe(Graphics g, int x, int y){
         if(this.getType()=='i'){
-            g.setColor(new Color(0,240,239));
-            g.fillRect(x,y,Var.widthBlock*4,Var.heightBlock);
+            drawSquare(g,x,y);
+            drawSquare(g,x+Var.widthBlock,y);
+            drawSquare(g,x+Var.widthBlock*2,y);
+            drawSquare(g,x+Var.widthBlock*3,y);
         }
         if(this.getType()=='o'){
-            g.setColor(new Color(241,240,0));
-            g.fillRect(x,y,Var.widthBlock*2,Var.heightBlock*2);
+            drawSquare(g,x,y);
+            drawSquare(g,x+Var.widthBlock,y);
+            drawSquare(g,x,y+Var.heightBlock);
+            drawSquare(g,x+Var.widthBlock,y+Var.heightBlock);
+
         }
         if(this.getType()=='s'){
-            g.setColor(new Color(2,240,0));
-            g.fillRect(x+Var.widthBlock,y,Var.widthBlock*2,Var.heightBlock);
-            g.fillRect(x,y+Var.heightBlock,Var.widthBlock*2,Var.heightBlock);
+            drawSquare(g,x+Var.widthBlock,y);
+            drawSquare(g,x+Var.widthBlock*2,y);
+            drawSquare(g,x,y+Var.heightBlock);
+            drawSquare(g,x+Var.widthBlock,y+Var.heightBlock);
         }
         if(this.getType()=='z'){
-            g.setColor(new Color(241,0,0));
-            g.fillRect(x,y,Var.widthBlock,Var.heightBlock);
-            g.fillRect(x,y+Var.heightBlock,Var.widthBlock*3,Var.heightBlock);
+            drawSquare(g,x,y);
+            drawSquare(g,x,y+Var.heightBlock);
+            drawSquare(g,x+Var.widthBlock,y+Var.heightBlock);
+            drawSquare(g,x+Var.widthBlock*2,y+Var.heightBlock);
         }
         if(this.getType()=='l'){
-            g.setColor(new Color(240,160,3));
-            g.fillRect(x,y,Var.widthBlock*2,Var.heightBlock);
-            g.fillRect(x+Var.widthBlock,y+Var.heightBlock,Var.widthBlock*2,Var.heightBlock);
+            drawSquare(g,x+Var.widthBlock*0,y);
+            drawSquare(g,x+Var.widthBlock*1,y);
+            drawSquare(g,x+Var.widthBlock*1,y+Var.heightBlock);
+            drawSquare(g,x+Var.widthBlock*2,y+Var.heightBlock);
         }
         if(this.getType()=='j'){
-            g.setColor(new Color(0,0,240));
-            g.fillRect(x+Var.widthBlock*2,y,Var.widthBlock,Var.heightBlock);
-            g.fillRect(x,y+Var.heightBlock,Var.widthBlock*3,Var.heightBlock);
+            drawSquare(g,x+Var.widthBlock*2,y);
+            
+            drawSquare(g,x+Var.widthBlock*0,y+Var.heightBlock);
+            drawSquare(g,x+Var.widthBlock*1,y+Var.heightBlock);
+            drawSquare(g,x+Var.widthBlock*2,y+Var.heightBlock);
         }
         if(this.getType()=='t'){
-            g.setColor(new Color(158,0,240));
-            g.fillRect(x+Var.widthBlock,y,Var.widthBlock,Var.heightBlock*2);
-            g.fillRect(x,y+Var.heightBlock,Var.widthBlock*3,Var.heightBlock);
+            drawSquare(g,x+Var.widthBlock,y);
+            drawSquare(g,x,y+Var.heightBlock);
+            drawSquare(g,x+Var.widthBlock,y+Var.heightBlock);
+            drawSquare(g,x+Var.widthBlock*2,y+Var.heightBlock);
         }
+    }
+    private void drawSquare(Graphics g, int x, int y){
+        g.setColor(color.brighter());
+        g.fillRect(x+3,y,Var.widthBlock-3,3);
+        g.fillRect(x,y,3,Var.heightBlock);
+
+        g.setColor(color.darker());
+        g.fillRect(x,y+Var.heightBlock-3,Var.widthBlock,3);
+        g.fillRect(x+Var.widthBlock-3,y,3,Var.heightBlock);
+
+
+        g.setColor(color);
+        g.fillRect(x+3,y+3,Var.widthBlock-6,Var.heightBlock-6);
+
     }
 }
