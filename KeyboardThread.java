@@ -10,11 +10,23 @@ public class KeyboardThread implements Runnable{
         this.grid = grid;
         this.sc = sc;
     }
-
+    public void updateGrid(GridManager grid){
+        this.grid = grid;
+    }
     public void run(){
         while(true){
             if(Input.keyboard[37]){
-                grid.moveLeftActiveBlock();
+                if(grid==null){
+                    sc.changeFocused();
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        //TODO: handle exception
+                    }
+    
+                }else{
+                    grid.moveLeftActiveBlock();
+                }
                 sc.repaint();
                 try {
                     Thread.sleep(100);
@@ -24,7 +36,17 @@ public class KeyboardThread implements Runnable{
     
             }
             if(Input.keyboard[39]){
-                grid.moveRightActiveBlock();
+                if(grid==null){
+                    sc.changeFocused();
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        //TODO: handle exception
+                    }
+    
+                }else{
+                    grid.moveRightActiveBlock();
+                }
                 sc.repaint();
 
                 try {
@@ -34,7 +56,11 @@ public class KeyboardThread implements Runnable{
                 }
             }
             if(Input.keyboard[38]){
-                grid.rotateActiveBlock();
+                if(grid==null){
+
+                }else{
+                    grid.rotateActiveBlock();
+                }
                 sc.repaint();
 
                 try {
@@ -44,8 +70,16 @@ public class KeyboardThread implements Runnable{
                 }
             }
             if(Input.keyboard[32]){
-                while(grid.isMoving()){
-                    grid.moveDownActiveBlock();
+                if(!sc.playing()){
+                    if(sc.lobby()){
+                        sc.ready();
+                    }else{
+                        sc.setUp();
+                    }
+                }else{
+                    while(grid.isMoving()){
+                        grid.moveDownActiveBlock();
+                    }
                 }
                 sc.repaint();
 
@@ -55,8 +89,18 @@ public class KeyboardThread implements Runnable{
                     //TODO: handle exception
                 }
             }
+            if(Input.keyboard[10]){
+                if(!sc.playing()){
+                    sc.setUp();
+                }
+
+            }
             if(Input.keyboard[40]){
-                grid.moveDownActiveBlock();
+                if(grid==null){
+
+                }else{
+                    grid.moveDownActiveBlock();
+                }
                 sc.repaint();
 
                 try {
@@ -66,7 +110,11 @@ public class KeyboardThread implements Runnable{
                 }
             }
             if(Input.keyboard[67]){
-                grid.store();
+                if(grid==null){
+
+                }else{
+                    grid.store();
+                }
                 sc.repaint();
             }
             try {

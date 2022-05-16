@@ -6,8 +6,11 @@ public class Var{
 
     public static int opponentWidthBlock = 5;
     public static int opponentHeightBlock = 5;
+    
+    public static final String ip = "10.210.71.146";
      
     public static final boolean debug = false;
     public static boolean networking = false;
     public static boolean music = false;
+    
 }

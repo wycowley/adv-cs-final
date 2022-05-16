@@ -26,7 +26,6 @@ public class Input implements MouseListener, MouseMotionListener, KeyListener, M
         jpanel.addMouseWheelListener(this);
     }
     public void keyPressed(KeyEvent key) {
-        System.out.println("type:     "+(int)key.getKeyCode());
         keyboard[(int) key.getKeyCode()] = true;
         
     }

@@ -16,25 +16,25 @@ public class Screen extends JPanel implements ActionListener {
     private BufferedReader in;
     private PrintWriter out;
     private PushbackInputStream pin;
+    private KeyboardThread keyManager;
     private int uid = (int)(Math.random()*90000)+10000;
     private int queuedRows;
+
+
+    private boolean started = false;
+    private boolean single = false;
+    private boolean lobby = false;
+    private boolean ready = false;
+    
+
+
     private DLList<OpponentGrid> opponentGrids = new DLList<OpponentGrid>();
 
     public Screen() {
-        new Input(this);
-
-        this.playSound("sound/tetris.wav", true);
-
         this.setLayout(null);
-        grid = new GridManager();
-        grid.createBlockInQueue();
-        grid.createBlockInQueue();
-        grid.createBlockInQueue();
 
-
-        grid.createBlock();
-
-        KeyboardThread keyManager = new KeyboardThread(grid, this);
+        new Input(this);
+        keyManager = new KeyboardThread(grid, this);
         Thread keyboardThread = new Thread(keyManager);
         keyboardThread.start();
 
@@ -44,16 +44,100 @@ public class Screen extends JPanel implements ActionListener {
         
 
     }
+    public void startGame(){
+        this.playSound("sound/tetris.wav", true);
+        System.out.println("Started starting game");
+        grid = new GridManager();
+        keyManager.updateGrid(grid);
 
+        grid.createBlockInQueue();
+        grid.createBlockInQueue();
+        grid.createBlockInQueue();
+        grid.createBlock();
+
+
+        started = true;
+
+
+    }
     public Dimension getPreferredSize() {
         //Sets the size of the panel
         return new Dimension(660,680);
     }
-
+    public boolean playing(){
+        return this.started;
+    }
+    public boolean lobby(){
+        return this.lobby;
+    }
+    public void ready(){
+        if(ready==false){
+            ready = true;
+            out.println("ready");
+        }else{
+            ready = false;
+            out.println("notready");
+        }
+    }
+    public void changeFocused(){
+        single = !single;
+        repaint();
+    }
+    public void setUp(){
+        if(single){
+            Var.networking = false;
+            this.startGame();
+        }else{
+            if(lobby)
+                return;
+            lobby = true;
+            poll();
+            repaint();
+            // do the lobby crap
+        }
+    }
+    
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         g.setColor(Color.WHITE);
         g.fillRect(0,0,1000,1000);
+
+        if(grid==null && lobby == false){
+            g.setColor(Color.CYAN);
+            if(single){
+                g.fillRect(380,250,200,100);
+            }else{
+                g.fillRect(80,250,200,100);
+
+            }
+            g.setColor(Color.BLACK);
+            g.setFont(new Font("Arial", Font.PLAIN, 30));
+
+            g.drawString("Multiplayer", 100, 300);
+            g.drawString("Single Player", 400, 300);
+
+            g.setFont(new Font("Arial", Font.PLAIN, 20));
+            g.drawString("Press space or enter to start", 100, 400);
+            return;
+        }else if(grid==null && lobby){
+            if(ready){
+                g.setColor(Color.BLACK);
+                g.setFont(new Font("Arial", Font.PLAIN, 30));
+    
+                g.drawString("Ready",100,300);
+
+            }else{
+                g.setColor(Color.CYAN);
+                g.fillRect(70,250,200,100);
+                g.setColor(Color.BLACK);
+                g.setFont(new Font("Arial", Font.PLAIN, 30));
+    
+                g.drawString("Ready up!",100,300);
+
+            }
+            return;
+        }
+
 		
         if(grid.getGameOver() && Var.networking){
             for(int i = 0;i<opponentGrids.size();i++){
@@ -126,6 +210,29 @@ public class Screen extends JPanel implements ActionListener {
             }catch(Exception e){
                 e.printStackTrace();
             }
+            if(lobby){
+                try {
+                    if(pin==null){
+                        continue;
+                    }
+                    if(pin.available()!=0){
+                        String thing = in.readLine();
+                        if(thing.equals("start")){
+                            Var.networking = true;
+                            lobby = false;
+    
+                            this.startGame();
+    
+                        }
+                    }
+                } catch (IOException e) {
+                    //TODO: handle exception
+                }
+                continue;
+            }
+            if(!started){
+                continue;
+            }
             
             if(!Var.debug){
                 grid.moveDownActiveBlock();
@@ -170,17 +277,21 @@ public class Screen extends JPanel implements ActionListener {
         }
     }
     public void poll(){
-        if(!Var.networking){
-            return;
-        }
-        String hostName = "10.210.71.146"; 
+        // if(!Var.networking){
+        //     return;
+        // }
+        System.out.println("Trying to connect");
+
+        String hostName = Var.ip; 
 		int portNumber = 3333;
         Socket serverSocket;
         try {
             serverSocket = new Socket(hostName, portNumber);
+
             out = new PrintWriter(serverSocket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()));
             pin = new PushbackInputStream(serverSocket.getInputStream());
+            System.out.println("Connected");
         } catch (IOException e) {
             System.out.println("UNABLE TO CONNECT");
             System.out.println(e);
