@@ -131,6 +131,19 @@ public class Block {
 
         g.setColor(color);
         g.fillRect(x+3,y+3,Var.widthBlock-6,Var.heightBlock-6);
+    }
+    public static void drawSquare(Graphics g, int x, int y, Color color, int width, int height){
+        g.setColor(color.brighter());
+        g.fillRect(x+3,y,width-3,3);
+        g.fillRect(x,y,3,height);
+
+        g.setColor(color.darker());
+        g.fillRect(x,y+height-3,width,3);
+        g.fillRect(x+width-3,y,3,height);
+
+
+        g.setColor(color);
+        g.fillRect(x+3,y+3,width-6,height-6);
 
     }
 }

@@ -1,6 +1,6 @@
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.JPanel;
+// import java.awt.*;
+// import java.awt.event.*;
+// import javax.swing.JPanel;
 
 
 public class KeyboardThread implements Runnable{
@@ -21,7 +21,7 @@ public class KeyboardThread implements Runnable{
                     try {
                         Thread.sleep(200);
                     } catch (InterruptedException e) {
-                        //TODO: handle exception
+                        System.out.println(e);
                     }
     
                 }else{
@@ -31,7 +31,7 @@ public class KeyboardThread implements Runnable{
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
-                    //TODO: handle exception
+                    System.out.println(e);
                 }
     
             }
@@ -41,7 +41,7 @@ public class KeyboardThread implements Runnable{
                     try {
                         Thread.sleep(200);
                     } catch (InterruptedException e) {
-                        //TODO: handle exception
+                        System.out.println(e);
                     }
     
                 }else{
@@ -52,7 +52,7 @@ public class KeyboardThread implements Runnable{
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
-                    //TODO: handle exception
+                    System.out.println(e);
                 }
             }
             if(Input.keyboard[38]){
@@ -66,7 +66,7 @@ public class KeyboardThread implements Runnable{
                 try {
                     Thread.sleep(150);
                 } catch (InterruptedException e) {
-                    //TODO: handle exception
+                    System.out.println(e);
                 }
             }
             if(Input.keyboard[32]){
@@ -86,7 +86,7 @@ public class KeyboardThread implements Runnable{
                 try {
                     Thread.sleep(300);
                 } catch (InterruptedException e) {
-                    //TODO: handle exception
+                    System.out.println(e);
                 }
             }
             if(Input.keyboard[10]){
@@ -106,7 +106,7 @@ public class KeyboardThread implements Runnable{
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
-                    //TODO: handle exception
+                    System.out.println(e);
                 }
             }
             if(Input.keyboard[67]){
@@ -121,7 +121,7 @@ public class KeyboardThread implements Runnable{
                 Thread.sleep(10);
                 
             } catch (InterruptedException e) {
-                //TODO: handle exception
+                System.out.println(e);
             }
         }
     }

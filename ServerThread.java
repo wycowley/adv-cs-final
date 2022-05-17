@@ -1,24 +1,22 @@
-import java.util.*;
 import java.io.*;
 import java.net.*;
 
 public class ServerThread implements Runnable{
     private Manager manager;
-    private Socket clientSocket;
+    // private Socket clientSocket;
     private PrintWriter out;
     private BufferedReader in;
 
     
     public ServerThread(Manager manager, Socket clientSocket){
         this.manager = manager;
-        this.clientSocket = clientSocket;
+        // this.clientSocket = clientSocket;
         try {
             out = new PrintWriter(clientSocket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
         } catch (IOException e) {
             System.out.println(e);
-            //TODO: handle exception
         }
        
     }

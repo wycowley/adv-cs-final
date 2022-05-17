@@ -2,9 +2,6 @@ import javax.swing.JPanel;
 import java.awt.*;
 import java.awt.event.*;
 
-import javax.swing.JButton;
-import javax.swing.JTextField;
-
 import java.io.*;
 import java.net.*;
 import javax.sound.sampled.*;
@@ -25,7 +22,8 @@ public class Screen extends JPanel implements ActionListener {
     private boolean single = false;
     private boolean lobby = false;
     private boolean ready = false;
-    
+    private double tick = 0;
+    private int speed = 100;
 
 
     private DLList<OpponentGrid> opponentGrids = new DLList<OpponentGrid>();
@@ -45,6 +43,7 @@ public class Screen extends JPanel implements ActionListener {
 
     }
     public void startGame(){
+
         this.playSound("sound/tetris.wav", true);
         System.out.println("Started starting game");
         grid = new GridManager();
@@ -53,7 +52,7 @@ public class Screen extends JPanel implements ActionListener {
         grid.createBlockInQueue();
         grid.createBlock();
 
-
+        speed = 300;
         started = true;
 
 
@@ -100,37 +99,77 @@ public class Screen extends JPanel implements ActionListener {
         g.setColor(Color.WHITE);
         g.fillRect(0,0,1000,1000);
 
+
+        // drawn when just opening the app
         if(grid==null && lobby == false){
-            g.setColor(Color.CYAN);
+            g.setColor(new Color(0,0,0));
+            g.fillRect(0,0,1000,1000);
+    
+            g.setColor(new Color(30,30,30));
             if(single){
-                g.fillRect(380,250,200,100);
+                for(int i = 0;i<10;i++){
+                    for(int j = 0;j<10;j++){
+                        Block.drawSquare(g,330+i*33, (int)(Math.sin((tick/180.0*Math.PI*10+((double)(i+9))/2))*40+700-j*33), new Color(255,j*20,j*20),33,33);
+                    }
+                }
+
             }else{
-                g.fillRect(80,250,200,100);
-
+                for(int i = 0;i<10;i++){
+                    for(int j = 0;j<10;j++){
+                        Block.drawSquare(g,i*33, (int)(Math.sin((tick/180.0*Math.PI*10+((double)i)/2))*40+700-j*33), new Color(j*20,j*20,255),33,33);
+                    }
+                }
             }
-            g.setColor(Color.BLACK);
-            g.setFont(new Font("Arial", Font.PLAIN, 30));
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("Arial", Font.BOLD, 30));
 
-            g.drawString("Multiplayer", 100, 300);
-            g.drawString("Single Player", 400, 300);
+            this.centeredString(g, "Multiplayer", 660/4, 300);
+            this.centeredString(g, "Single Player", 660/4+660/4*2, 300);
 
-            g.setFont(new Font("Arial", Font.PLAIN, 20));
-            g.drawString("Press space or enter to start", 100, 400);
+
+            g.setFont(new Font("Arial", Font.BOLD, 20));
+
+            this.centeredString(g,"Use arrow keys to navigate",330,600);
+            this.centeredString(g,"Press space or enter to start",330,620);
+
+            // g.drawString("Use arrow keys to navigate", 100, 400);
+            // g.drawString("Press space or enter to start", 100, 400);
             return;
         }else if(grid==null && lobby){
+            g.setColor(new Color(0,0,0));
+            g.fillRect(0,0,1000,1000);
+
+            // drawn when selected multiplayer, but the game has not yet started
             if(ready){
-                g.setColor(Color.BLACK);
-                g.setFont(new Font("Arial", Font.PLAIN, 30));
+                for(int i = 0;i<5;i++){
+                    for(int j = 0;j<5;j++){
+                        Block.drawSquare(g,i*(660/5), j*(680/5), new Color(i*20+50,200,j*20+50),660/5,680/5);
+                    }
+                }
+                g.setColor(Color.WHITE);
+                g.setFont(new Font("Arial", Font.BOLD, 40));
     
-                g.drawString("Ready",100,300);
+                this.centeredString(g,"Ready",330,340);
+                g.setFont(new Font("Arial", Font.BOLD, 20));
+
+                this.centeredString(g,"Press space to unready",330,600);
+
 
             }else{
-                g.setColor(Color.CYAN);
-                g.fillRect(70,250,200,100);
-                g.setColor(Color.BLACK);
-                g.setFont(new Font("Arial", Font.PLAIN, 30));
+                for(int i = 0;i<5;i++){
+                    for(int j = 0;j<5;j++){
+                        Block.drawSquare(g,i*(660/5), j*(680/5), new Color(255,i*20+50,j*20+50),660/5,680/5);
+                    }
+                }
+                g.setColor(Color.WHITE);
+                g.setFont(new Font("Arial", Font.BOLD, 40));
     
-                g.drawString("Ready up!",100,300);
+                this.centeredString(g,"Ready up!",330,340);
+
+                g.setFont(new Font("Arial", Font.BOLD, 20));
+                this.centeredString(g,"Press space to ready up",330,600);
+                this.centeredString(g,"Make sure to wait until people are in the lobby",330,620);
+                this.centeredString(g,"Make sure someone is running the server",330,640);
 
             }
             return;
@@ -162,9 +201,9 @@ public class Screen extends JPanel implements ActionListener {
             }
             
         }else{
-            g.setFont(new Font("Arial", Font.PLAIN, 20));
+            g.setFont(new Font("Arial", Font.PLAIN, 30));
             g.setColor(Color.BLACK);
-            g.drawString(points+" points", Var.widthBlock*Var.gridWidth+60, Var.heightBlock*Var.gridHeight);
+            g.drawString(points+" points", Var.widthBlock*Var.gridWidth+60, Var.heightBlock*Var.gridHeight+20);
         }
 
         // draw stored block
@@ -183,6 +222,12 @@ public class Screen extends JPanel implements ActionListener {
                 g.fillRect(10,20+Var.gridHeight*Var.heightBlock-queuedRows*Var.heightBlock,20,queuedRows*Var.heightBlock);
             }
         }
+    }
+    private void centeredString(Graphics g, String s,int centeredX, int y){
+        Graphics2D g2d = (Graphics2D) g;
+        int stringLen = (int)g2d.getFontMetrics().getStringBounds(s, g2d).getWidth();
+        g.drawString(s, centeredX-stringLen/2, y);
+
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -209,10 +254,11 @@ public class Screen extends JPanel implements ActionListener {
     public void animate(){
         while(true){
             try{
-                Thread.sleep(300);
+                Thread.sleep(speed);
             }catch(Exception e){
                 e.printStackTrace();
             }
+            tick++;
             if(lobby){
                 try {
                     if(pin==null){
@@ -228,11 +274,12 @@ public class Screen extends JPanel implements ActionListener {
                         }
                     }
                 } catch (IOException e) {
-                    //TODO: handle exception
+                    System.out.println(e);
                 }
                 continue;
             }
             if(!started){
+                repaint();
                 continue;
             }
             
@@ -312,7 +359,6 @@ public class Screen extends JPanel implements ActionListener {
         } catch (IOException e) {
             System.out.println("UNABLE TO CONNECT");
             System.out.println(e);
-            //TODO: handle exception
         }
 
     }
@@ -364,12 +410,12 @@ public class Screen extends JPanel implements ActionListener {
             }
             
         } catch (IOException e) {
-            //TODO: handle exception
             System.out.println("ISSUE WITH SEEING IF THERE IS SOMETHING IN INPUT STREAM");
             System.out.println(e);
         }
 
     }
+    
 
 
 }
