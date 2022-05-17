@@ -51,8 +51,6 @@ public class Screen extends JPanel implements ActionListener {
         keyManager.updateGrid(grid);
 
         grid.createBlockInQueue();
-        grid.createBlockInQueue();
-        grid.createBlockInQueue();
         grid.createBlock();
 
 
@@ -147,7 +145,7 @@ public class Screen extends JPanel implements ActionListener {
         }
 
         DLList<Block> futureBlocks = grid.getFutureBlocks();
-        for(int i = 0;i<futureBlocks.size();i++){
+        for(int i = 0;i<3;i++){
             futureBlocks.get(i).drawMe(g,360,20+i*Var.gridHeight*4);
         }
 

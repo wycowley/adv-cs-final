@@ -72,32 +72,51 @@ public class GridManager {
     public Block getStoredBlock(){
         return this.storedBlock;
     }
-    public void createBlockInQueue(){
+    public synchronized void createBlockInQueue(){
+        System.out.println(futureBlocks.size());
+        if(futureBlocks.size()>4){
+            System.out.println("help");
+            return;
+        }
         // futureBlocks.add(new Block('o',blockNum));
 
-        int random = (int)(Math.random()*7);
-        if(random==0){
-            futureBlocks.add(new Block('i',blockNum));
-        }
-        if(random==1){
-            futureBlocks.add(new Block('o',blockNum));
-        }
-        if(random==2){
-            futureBlocks.add(new Block('t',blockNum));
-        }
-        if(random==3){
-            futureBlocks.add(new Block('s',blockNum));
-        }
-        if(random==4){
-            futureBlocks.add(new Block('z',blockNum));
-        }
-        if(random==5){
-            futureBlocks.add(new Block('l',blockNum));
-        }
-        if(random==6){
-            futureBlocks.add(new Block('j',blockNum));
-        }
+        // adds all 7 blocks to a list
+        DLList<Block> all7Blocks = new DLList<Block>();
+        all7Blocks.add(new Block('i',blockNum));
         blockNum++;
+
+        all7Blocks.add(new Block('o',blockNum));
+        blockNum++;
+
+        all7Blocks.add(new Block('t',blockNum));
+        blockNum++;
+
+        all7Blocks.add(new Block('s',blockNum));
+        blockNum++;
+
+        all7Blocks.add(new Block('z',blockNum));
+        blockNum++;
+
+        all7Blocks.add(new Block('l',blockNum));
+        blockNum++;
+
+        all7Blocks.add(new Block('j',blockNum));
+        blockNum++;
+
+        // scrambles that list
+        for(int i = 0;i<all7Blocks.size();i++){
+            Block current = all7Blocks.get(i);
+            int random = (int)(Math.random()*7);
+
+            all7Blocks.set(i,all7Blocks.get(random));
+            all7Blocks.set(random,current);
+        }
+        // adds it to the queue
+
+        for(int i = 0;i<all7Blocks.size();i++){
+            futureBlocks.add(all7Blocks.get(i));
+        }
+
     }
     public void createBlock(){
         System.out.println("CREATED A BLOCK");
@@ -222,7 +241,7 @@ public class GridManager {
 
             b.setRotationStart(new Tile(4,0));
         }
-        if(futureBlocks.size()<3){
+        if(futureBlocks.size()<4){
 
             this.createBlockInQueue();
         }
