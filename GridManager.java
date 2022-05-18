@@ -73,9 +73,9 @@ public class GridManager {
         return this.storedBlock;
     }
     public synchronized void createBlockInQueue(){
-        System.out.println(futureBlocks.size());
+        // System.out.println(futureBlocks.size());
         if(futureBlocks.size()>4){
-            System.out.println("help");
+            // System.out.println("help");
             return;
         }
         // futureBlocks.add(new Block('o',blockNum));
@@ -119,7 +119,7 @@ public class GridManager {
 
     }
     public void createBlock(){
-        System.out.println("CREATED A BLOCK");
+        // System.out.println("CREATED A BLOCK");
         // let's just create an l block for now
         Block b = futureBlocks.get(0);
         futureBlocks.remove(0);
@@ -295,7 +295,7 @@ public class GridManager {
 
         }else{
             // move down
-            System.out.println("Moving the block left");
+            // System.out.println("Moving the block left");
             b.clearTiles();
             for(int i = 0 ;i<tiles.size();i++){
 
@@ -371,13 +371,13 @@ public class GridManager {
                 int x = t.getX();
                 int y = t.getY();
                 if(y+1>=grid[0].length){
-                    System.out.println("Hit the bottom?");
+                    // System.out.println("Hit the bottom?");
                     return true;
                 }
                 if(grid[x][y+1].containsBlock()){
                     boolean result = grid[x][y+1].getBlock().equals(b);
                     if(!result){
-                        System.out.println("Hit a block?");
+                        // System.out.println("Hit a block?");
                         return true;
                     }
                 }
@@ -393,14 +393,14 @@ public class GridManager {
                 int x = t.getX();
                 int y = t.getY();
                 if(x-1<0){
-                    System.out.println("Hit the side?");
+                    // System.out.println("Hit the side?");
                     collision = true;
                     break;
                 }
                 if(grid[x-1][y].containsBlock()){
                     boolean result = grid[x-1][y].getBlock().equals(b);
                     if(!result){
-                        System.out.println("Hit a block?");
+                        // System.out.println("Hit a block?");
                         collision = true;
                         break;
                     }
@@ -416,14 +416,14 @@ public class GridManager {
                 int x = t.getX();
                 int y = t.getY();
                 if(x+1>=Var.gridWidth){
-                    System.out.println("Hit the side?");
+                    // System.out.println("Hit the side?");
                     collision = true;
                     break;
                 }
                 if(grid[x+1][y].containsBlock()){
                     boolean result = grid[x+1][y].getBlock().equals(b);
                     if(!result){
-                        System.out.println("Hit a block?");
+                        // System.out.println("Hit a block?");
                         collision = true;
                         break;
                     }
@@ -470,7 +470,7 @@ public class GridManager {
                     y++;
                 }
             }
-            System.out.println("SETTING MOVING TO FALSE");
+            // System.out.println("SETTING MOVING TO FALSE");
             blocks.get(blocks.size()-1).setMoving(false);
 
         }
@@ -496,7 +496,7 @@ public class GridManager {
                 if(!grid[x][y].containsBlock() && y<rowToStart){
                     continue;
                 }
-                System.out.println("BUMPS INTO THE CEILING!  DEAD");
+                // System.out.println("BUMPS INTO THE CEILING!  DEAD");
                 // if a block that isn't moving touches the ceiling, you are dead!
                 if(y-numRows<0 && grid[x][y].containsBlock() && !grid[x][y].getBlock().isMoving())
                     return true;
@@ -513,7 +513,7 @@ public class GridManager {
                     if(x==randomNum){
                         grid[x][y] = new Tile(x,y);
                     }else{
-                        System.out.println("Adding fake block to "+x+","+y);
+                        // System.out.println("Adding fake block to "+x+","+y);
                         grid[x][y] = new Tile(x,y);
                         grid[x][y].addBlock(fakeBlock);
                     }
@@ -535,7 +535,7 @@ public class GridManager {
     public synchronized void rotateActiveBlock(){
         if(gameOver)
             return;
-        System.out.println("Rotated");
+        // System.out.println("Rotated");
         // get the rotation start, and the size of the rotation matrix
         Block b = blocks.get(blocks.size()-1);
         int rotationStartX = b.getRotationStart().getX();
@@ -622,15 +622,15 @@ public class GridManager {
                     grid[initialX][initialY] = new Tile(initialX,initialY);
                     grid[initialX][initialY].addBlock(b);
                     b.addTile(grid[initialX][initialY]);
-                    System.out.println("Trying to replace something");
+                    // System.out.println("Trying to replace something");
                     coords.add(new Coord(rotatedX,rotatedY));
 
                 }
                         
                 
                 t.setXY(rotatedX,rotatedY);
-                System.out.println("Replacing "+initialX+","+initialY+" with "+rotatedX+","+rotatedY);
-                System.out.println("Contains block: "+t.containsBlock());
+                // System.out.println("Replacing "+initialX+","+initialY+" with "+rotatedX+","+rotatedY);
+                // System.out.println("Contains block: "+t.containsBlock());
                 grid[rotatedX][rotatedY] = t;
 
             }

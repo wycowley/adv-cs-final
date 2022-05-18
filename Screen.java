@@ -22,6 +22,10 @@ public class Screen extends JPanel implements ActionListener {
     private boolean single = false;
     private boolean lobby = false;
     private boolean ready = false;
+
+    private boolean gameFinished = false;
+    private boolean won = false;
+
     private double tick = 0;
     private int speed = 100;
 
@@ -93,7 +97,25 @@ public class Screen extends JPanel implements ActionListener {
             // do the lobby crap
         }
     }
-    
+    public boolean gameFinished(){
+        return this.gameFinished;
+    }
+    public void returnToMenu(){
+        out.println("clear");
+        this.gameFinished = false;
+        this.lobby = false;
+        this.started = false;
+        this.ready = false;
+        this.single = false;
+        Var.opponentHeightBlock = 5;
+        Var.opponentWidthBlock = 5;
+        this.points = 0;
+        this.queuedRows = 0;
+        this.opponentGrids.clear();
+        this.grid = null;
+        this.keyManager.updateGrid(null);
+        this.repaint();
+    }
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         g.setColor(Color.WHITE);
@@ -176,10 +198,38 @@ public class Screen extends JPanel implements ActionListener {
         }
 
 		
-        if(grid.getGameOver() && Var.networking){
+        if(grid.getGameOver() && Var.networking && !gameFinished){
             for(int i = 0;i<opponentGrids.size();i++){
                 opponentGrids.get(i).drawMe(g,20+Var.opponentWidthBlock*Var.gridWidth*i+20*i,20);
             }
+            return;
+        }
+        if(gameFinished && Var.networking){
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("Arial", Font.BOLD, 40));
+            if(won){
+                for(int i = 0;i<5;i++){
+                    for(int j = 0;j<5;j++){
+                        Block.drawSquare(g,i*(660/5), j*(680/5), new Color(i*20+50,200,j*20+50),660/5,680/5);
+                    }
+                }
+                g.setColor(Color.WHITE);
+                this.centeredString(g,"You won!",330,340);
+                g.setFont(new Font("Arial", Font.BOLD, 20));
+                this.centeredString(g,"Press space to return to menu",330,600);
+    
+            }else{
+                for(int i = 0;i<5;i++){
+                    for(int j = 0;j<5;j++){
+                        Block.drawSquare(g,i*(660/5), j*(680/5), new Color(255,i*20+50,j*20+50),660/5,680/5);
+                    }
+                }
+                g.setColor(Color.WHITE);
+
+                this.centeredString(g,"You lost!",330,340);
+            }
+            g.setFont(new Font("Arial", Font.BOLD, 20));
+            this.centeredString(g,"Press space to return to menu",330,600);
             return;
         }
 
@@ -211,7 +261,7 @@ public class Screen extends JPanel implements ActionListener {
             grid.getStoredBlock().drawMe(g,40,660-Var.heightBlock-5);
         }
 
-        // draw queued blocks
+        // draw queued rows
         if(Var.networking){
 
             g.setColor(new Color(210,210,210));
@@ -286,13 +336,18 @@ public class Screen extends JPanel implements ActionListener {
             if(!Var.debug){
                 grid.moveDownActiveBlock();
             }
+            this.sendGrid();
+
             if(Var.networking && pin != null){
                 this.readInputStream();
             }
-            this.sendGrid();
+            if(grid==null){
+                repaint();
+                continue;
+            }
 
             if(!grid.isMoving()){
-                System.out.println("CREATING NEW BLOCK");
+                // System.out.println("CREATING NEW BLOCK");
                 if(grid.getClearedRows()!=0){
                     playSound("sound/clear.wav", false);
                     
@@ -331,6 +386,7 @@ public class Screen extends JPanel implements ActionListener {
                 grid.createBlock();
                 if(grid.collision('d',grid.getActiveBlock())){
                     grid.gameOver();
+                    out.println("dead");
                     Var.opponentHeightBlock = 15;
                     Var.opponentWidthBlock = 15;
                 }
@@ -390,6 +446,8 @@ public class Screen extends JPanel implements ActionListener {
 
     }
     private void sendGrid(){
+        if(grid==null)
+            return;
         String toSend = "uid"+uid+" "+grid.toString();
         if(Var.networking){
 
@@ -400,6 +458,16 @@ public class Screen extends JPanel implements ActionListener {
         try {
             while(pin.available()!=0){
                 String message = in.readLine();
+                if(message.contains("win")){
+                    System.out.println("YOU WIN!");
+                    grid.gameOver();
+                    this.handleMultiplayerWin();
+                }
+                if(message.contains("lose")){
+                    System.out.println("YOU LOSE");
+                    this.handleMultiplayerLoss();
+
+                }
                 if(message.contains("lines")){
                     char linesToAdd = message.charAt(message.indexOf("lines")+5);
                     queuedRows += Character.getNumericValue(linesToAdd);
@@ -413,6 +481,28 @@ public class Screen extends JPanel implements ActionListener {
             System.out.println("ISSUE WITH SEEING IF THERE IS SOMETHING IN INPUT STREAM");
             System.out.println(e);
         }
+
+    }
+    private void handleMultiplayerWin(){
+        this.gameFinished = true;
+        this.won = true;
+        this.started = false;
+        this.ready = false;
+        this.lobby = false;
+        this.speed = 100;
+        // grid = null;
+
+
+    }
+    private void handleMultiplayerLoss(){
+        this.gameFinished = true;
+        this.won = false;
+        this.started = false;
+        this.ready = false;
+        this.lobby = false;
+        this.speed = 100;
+
+        // grid = null;
 
     }
     

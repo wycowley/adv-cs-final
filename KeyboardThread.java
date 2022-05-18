@@ -73,8 +73,11 @@ public class KeyboardThread implements Runnable{
                 if(!sc.playing()){
                     if(sc.lobby()){
                         sc.ready();
+                    }else if(sc.gameFinished()){
+                        sc.returnToMenu();
                     }else{
                         sc.setUp();
+
                     }
                 }else{
                     while(grid.isMoving()){
