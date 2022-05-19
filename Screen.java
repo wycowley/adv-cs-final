@@ -29,6 +29,7 @@ public class Screen extends JPanel implements ActionListener {
     private double tick = 0;
     private int speed = 100;
 
+    private String prompt = "";
 
     private DLList<OpponentGrid> opponentGrids = new DLList<OpponentGrid>();
 
@@ -85,8 +86,10 @@ public class Screen extends JPanel implements ActionListener {
         repaint();
     }
     public void setUp(){
+        prompt = "";
         if(single){
             Var.networking = false;
+            points = 0;
             this.startGame();
         }else{
             if(lobby)
@@ -101,7 +104,10 @@ public class Screen extends JPanel implements ActionListener {
         return this.gameFinished;
     }
     public void returnToMenu(){
-        out.println("clear");
+        if(Var.networking){
+
+            out.println("clear");
+        }
         this.gameFinished = false;
         this.lobby = false;
         this.started = false;
@@ -134,7 +140,6 @@ public class Screen extends JPanel implements ActionListener {
                         Block.drawSquare(g,330+i*33, (int)(Math.sin((tick/180.0*Math.PI*10+((double)(i+9))/2))*40+700-j*33), new Color(255,j*20,j*20),33,33);
                     }
                 }
-
             }else{
                 for(int i = 0;i<10;i++){
                     for(int j = 0;j<10;j++){
@@ -153,6 +158,7 @@ public class Screen extends JPanel implements ActionListener {
 
             this.centeredString(g,"Use arrow keys to navigate",330,600);
             this.centeredString(g,"Press space or enter to start",330,620);
+            this.centeredString(g,prompt,330,50);
 
             // g.drawString("Use arrow keys to navigate", 100, 400);
             // g.drawString("Press space or enter to start", 100, 400);
@@ -215,8 +221,6 @@ public class Screen extends JPanel implements ActionListener {
                 }
                 g.setColor(Color.WHITE);
                 this.centeredString(g,"You won!",330,340);
-                g.setFont(new Font("Arial", Font.BOLD, 20));
-                this.centeredString(g,"Press space to return to menu",330,600);
     
             }else{
                 for(int i = 0;i<5;i++){
@@ -231,6 +235,23 @@ public class Screen extends JPanel implements ActionListener {
             g.setFont(new Font("Arial", Font.BOLD, 20));
             this.centeredString(g,"Press space to return to menu",330,600);
             return;
+        }else if(gameFinished && !Var.networking){
+            for(int i = 0;i<5;i++){
+                for(int j = 0;j<5;j++){
+                    Block.drawSquare(g,i*(660/5), j*(680/5), new Color(i*20+50,200,j*20+50),660/5,680/5);
+                }
+            }
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("Arial", Font.BOLD, 30));
+            this.centeredString(g,"Great job!",330,340);
+            g.setFont(new Font("Arial", Font.BOLD, 40));
+
+            this.centeredString(g,"Total score: "+points,330,380);
+
+            g.setFont(new Font("Arial", Font.BOLD, 20));
+            this.centeredString(g,"Press space to return to menu",330,600);
+            return;
+
         }
 
         DLList<Block> futureBlocks = grid.getFutureBlocks();
@@ -386,9 +407,15 @@ public class Screen extends JPanel implements ActionListener {
                 grid.createBlock();
                 if(grid.collision('d',grid.getActiveBlock())){
                     grid.gameOver();
-                    out.println("dead");
+                    if(Var.networking){
+                        out.println("dead");
+                    }else{
+
+                        handleSingleplayerLoss();
+                    }
                     Var.opponentHeightBlock = 15;
                     Var.opponentWidthBlock = 15;
+                    
                 }
 
             }
@@ -415,6 +442,10 @@ public class Screen extends JPanel implements ActionListener {
         } catch (IOException e) {
             System.out.println("UNABLE TO CONNECT");
             System.out.println(e);
+
+            lobby = false;
+            prompt = "Unable to connect, check IP and server status";
+            repaint();
         }
 
     }
@@ -495,6 +526,17 @@ public class Screen extends JPanel implements ActionListener {
 
     }
     private void handleMultiplayerLoss(){
+        this.gameFinished = true;
+        this.won = false;
+        this.started = false;
+        this.ready = false;
+        this.lobby = false;
+        this.speed = 100;
+
+        // grid = null;
+
+    }
+    private void handleSingleplayerLoss(){
         this.gameFinished = true;
         this.won = false;
         this.started = false;
