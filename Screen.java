@@ -388,20 +388,33 @@ public class Screen extends JPanel implements ActionListener {
                         
                     }
                 }
-                if(Var.networking){
-                    if(grid.getClearedRows()!=0 && queuedRows==0){
-                        out.println("lines"+grid.getClearedRows());
-                    }
-                }
+                int queuedRemoved = 0;
                 if(queuedRows>0){
                     if(grid.getClearedRows()!=0){
 
                         queuedRows = Math.max(0,queuedRows-grid.getClearedRows()*2);
+                        queuedRemoved = queuedRows-grid.getClearedRows()*2;
                     }else{
                         if(queuedRows>1){
                             grid.addRows(queuedRows/2);
                         }
                         queuedRows = queuedRows%2;
+                    }
+                }
+                if(Var.networking){
+                    if(grid.getClearedRows()!=0 && queuedRows==0){
+                        int clearedRows;
+                        if(grid.getClearedRows()==4){
+                            clearedRows = (int)(7.0/(Math.max((double)opponentGrids.size()/2.0,1.0)));
+                        }else if(grid.getClearedRows()==3){
+                            clearedRows = (int)(5.0/(Math.max((double)opponentGrids.size()/2.0,1.0)));
+                        }else if(grid.getClearedRows()==2){
+                            clearedRows = (int)(2.0/(Math.max((double)opponentGrids.size()/2.0,1.0)));
+                        }else{
+                            clearedRows = (int)(1.0/(Math.max((double)opponentGrids.size()/2.0,1.0)));
+                        }
+                        clearedRows-=queuedRemoved;
+                        out.println("lines"+clearedRows);
                     }
                 }
                 grid.createBlock();
