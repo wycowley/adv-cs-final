@@ -1,4 +1,6 @@
 import javax.swing.JPanel;
+import javax.swing.JTextField;
+
 import java.awt.*;
 import java.awt.event.*;
 
@@ -14,6 +16,8 @@ public class Screen extends JPanel implements ActionListener {
     private PrintWriter out;
     private PushbackInputStream pin;
     private KeyboardThread keyManager;
+    private JTextField ipField;
+
     private int uid = (int)(Math.random()*90000)+10000;
     private int queuedRows;
     private int points;
@@ -22,6 +26,7 @@ public class Screen extends JPanel implements ActionListener {
     private boolean single = false;
     private boolean lobby = false;
     private boolean ready = false;
+    private boolean instructions = false;
 
     private boolean gameFinished = false;
     private boolean won = false;
@@ -43,6 +48,14 @@ public class Screen extends JPanel implements ActionListener {
 
         this.setFocusable(true);
 
+        ipField = new JTextField();
+        ipField.setBounds(300, 550, 200, 50);
+        ipField.setVisible(false);
+        ipField.addActionListener(this);
+
+
+        this.add(ipField);
+        
 
         
 
@@ -57,7 +70,7 @@ public class Screen extends JPanel implements ActionListener {
         grid.createBlockInQueue();
         grid.createBlock();
 
-        speed = 300;
+        speed = 350;
         started = true;
 
 
@@ -72,6 +85,9 @@ public class Screen extends JPanel implements ActionListener {
     public boolean lobby(){
         return this.lobby;
     }
+    public boolean instructions(){
+        return this.instructions;
+    }
     public void ready(){
         if(ready==false){
             ready = true;
@@ -83,6 +99,11 @@ public class Screen extends JPanel implements ActionListener {
     }
     public void changeFocused(){
         single = !single;
+        repaint();
+    }
+    public void changeInstructions(){
+        instructions = !instructions;
+        prompt = "";
         repaint();
     }
     public void setUp(){
@@ -122,156 +143,229 @@ public class Screen extends JPanel implements ActionListener {
         this.keyManager.updateGrid(null);
         this.repaint();
     }
-    public void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        g.setColor(Color.WHITE);
+    
+    private void drawMenu(Graphics g){
+        g.setColor(new Color(0,0,0));
         g.fillRect(0,0,1000,1000);
 
-
-        // drawn when just opening the app
-        if(grid==null && lobby == false){
-            g.setColor(new Color(0,0,0));
-            g.fillRect(0,0,1000,1000);
-    
-            g.setColor(new Color(30,30,30));
-            if(single){
-                for(int i = 0;i<10;i++){
-                    for(int j = 0;j<10;j++){
-                        Block.drawSquare(g,330+i*33, (int)(Math.sin((tick/180.0*Math.PI*10+((double)(i+9))/2))*40+700-j*33), new Color(255,j*20,j*20),33,33);
-                    }
-                }
-            }else{
-                for(int i = 0;i<10;i++){
-                    for(int j = 0;j<10;j++){
-                        Block.drawSquare(g,i*33, (int)(Math.sin((tick/180.0*Math.PI*10+((double)i)/2))*40+700-j*33), new Color(j*20,j*20,255),33,33);
-                    }
+        g.setColor(new Color(30,30,30));
+        if(single){
+            for(int i = 0;i<10;i++){
+                for(int j = 0;j<10;j++){
+                    Block.drawSquare(g,330+i*33, (int)(Math.sin((tick/180.0*Math.PI*10+((double)(i+9))/2))*40+700-j*33), new Color(255,j*20,j*20),33,33);
                 }
             }
-            g.setColor(Color.WHITE);
-            g.setFont(new Font("Arial", Font.BOLD, 30));
-
-            this.centeredString(g, "Multiplayer", 660/4, 300);
-            this.centeredString(g, "Single Player", 660/4+660/4*2, 300);
-
-
-            g.setFont(new Font("Arial", Font.BOLD, 20));
-
-            this.centeredString(g,"Use arrow keys to navigate",330,600);
-            this.centeredString(g,"Press space or enter to start",330,620);
-            this.centeredString(g,prompt,330,50);
-
-            // g.drawString("Use arrow keys to navigate", 100, 400);
-            // g.drawString("Press space or enter to start", 100, 400);
-            return;
-        }else if(grid==null && lobby){
-            g.setColor(new Color(0,0,0));
-            g.fillRect(0,0,1000,1000);
-
-            // drawn when selected multiplayer, but the game has not yet started
-            if(ready){
-                for(int i = 0;i<5;i++){
-                    for(int j = 0;j<5;j++){
-                        Block.drawSquare(g,i*(660/5), j*(680/5), new Color(i*20+50,200,j*20+50),660/5,680/5);
-                    }
+        }else{
+            for(int i = 0;i<10;i++){
+                for(int j = 0;j<10;j++){
+                    Block.drawSquare(g,i*33, (int)(Math.sin((tick/180.0*Math.PI*10+((double)i)/2))*40+700-j*33), new Color(j*20,j*20,255),33,33);
                 }
-                g.setColor(Color.WHITE);
-                g.setFont(new Font("Arial", Font.BOLD, 40));
-    
-                this.centeredString(g,"Ready",330,340);
-                g.setFont(new Font("Arial", Font.BOLD, 20));
-
-                this.centeredString(g,"Press space to unready",330,600);
-
-
-            }else{
-                for(int i = 0;i<5;i++){
-                    for(int j = 0;j<5;j++){
-                        Block.drawSquare(g,i*(660/5), j*(680/5), new Color(255,i*20+50,j*20+50),660/5,680/5);
-                    }
-                }
-                g.setColor(Color.WHITE);
-                g.setFont(new Font("Arial", Font.BOLD, 40));
-    
-                this.centeredString(g,"Ready up!",330,340);
-
-                g.setFont(new Font("Arial", Font.BOLD, 20));
-                this.centeredString(g,"Press space to ready up",330,600);
-                this.centeredString(g,"Make sure to wait until people are in the lobby",330,620);
-                this.centeredString(g,"Make sure someone is running the server",330,640);
-
             }
-            return;
         }
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 30));
 
-		
-        if(grid.getGameOver() && Var.networking && !gameFinished){
-            for(int i = 0;i<opponentGrids.size();i++){
-                opponentGrids.get(i).drawMe(g,20+Var.opponentWidthBlock*Var.gridWidth*i+20*i,20);
-            }
-            return;
-        }
-        if(gameFinished && Var.networking){
-            g.setColor(Color.WHITE);
-            g.setFont(new Font("Arial", Font.BOLD, 40));
-            if(won){
-                for(int i = 0;i<5;i++){
-                    for(int j = 0;j<5;j++){
-                        Block.drawSquare(g,i*(660/5), j*(680/5), new Color(i*20+50,200,j*20+50),660/5,680/5);
-                    }
-                }
-                g.setColor(Color.WHITE);
-                this.centeredString(g,"You won!",330,340);
-    
-            }else{
-                for(int i = 0;i<5;i++){
-                    for(int j = 0;j<5;j++){
-                        Block.drawSquare(g,i*(660/5), j*(680/5), new Color(255,i*20+50,j*20+50),660/5,680/5);
-                    }
-                }
-                g.setColor(Color.WHITE);
+        this.centeredString(g, "Multiplayer", 660/4, 300);
+        this.centeredString(g, "Single Player", 660/4+660/4*2, 300);
 
-                this.centeredString(g,"You lost!",330,340);
-            }
-            g.setFont(new Font("Arial", Font.BOLD, 20));
-            this.centeredString(g,"Press space to return to menu",330,600);
-            return;
-        }else if(gameFinished && !Var.networking){
+
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+
+        this.centeredString(g,"Use arrow keys to navigate",330,600);
+        this.centeredString(g,"Press space or enter to start",330,620);
+        this.centeredString(g,"Press i for instructions",330,50);
+
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+        g.setColor(new Color(255,0,0));
+        this.centeredString(g,prompt,330,80);
+
+        // g.drawString("Use arrow keys to navigate", 100, 400);
+        // g.drawString("Press space or enter to start", 100, 400);
+
+    }
+    private void drawLobby(Graphics g){
+        g.setColor(new Color(0,0,0));
+        g.fillRect(0,0,1000,1000);
+
+        // drawn when selected multiplayer, but the game has not yet started
+        if(ready){
             for(int i = 0;i<5;i++){
                 for(int j = 0;j<5;j++){
                     Block.drawSquare(g,i*(660/5), j*(680/5), new Color(i*20+50,200,j*20+50),660/5,680/5);
                 }
             }
             g.setColor(Color.WHITE);
-            g.setFont(new Font("Arial", Font.BOLD, 30));
-            this.centeredString(g,"Great job!",330,340);
             g.setFont(new Font("Arial", Font.BOLD, 40));
 
-            this.centeredString(g,"Total score: "+points,330,380);
+            this.centeredString(g,"Ready",330,340);
+            g.setFont(new Font("Arial", Font.BOLD, 20));
+
+            this.centeredString(g,"Press space to unready",330,600);
+
+
+        }else{
+            for(int i = 0;i<5;i++){
+                for(int j = 0;j<5;j++){
+                    Block.drawSquare(g,i*(660/5), j*(680/5), new Color(255,i*20+50,j*20+50),660/5,680/5);
+                }
+            }
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("Arial", Font.BOLD, 40));
+
+            this.centeredString(g,"Ready up!",330,340);
 
             g.setFont(new Font("Arial", Font.BOLD, 20));
-            this.centeredString(g,"Press space to return to menu",330,600);
+            this.centeredString(g,"Press space to ready up",330,600);
+            this.centeredString(g,"Make sure to wait until people are in the lobby",330,620);
+            this.centeredString(g,"Make sure someone is running the server",330,640);
+
+        }
+
+    }
+    private void drawOpponentsGameOver(Graphics g){
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Arial", Font.BOLD, 40));
+        this.centeredString(g,"You lost, sorry!",330,55);
+        for(int i = 0;i<opponentGrids.size();i++){
+            opponentGrids.get(i).drawMe(g,20+(Var.opponentWidthBlock*Var.gridWidth+20)*(i%3),70+(Var.opponentHeightBlock*Var.gridHeight+20)*(i/3));
+        }
+        return;
+
+    }
+    private void drawMultiplayerGameOver(Graphics g){
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 40));
+        if(won){
+            for(int i = 0;i<5;i++){
+                for(int j = 0;j<5;j++){
+                    Block.drawSquare(g,i*(660/5), j*(680/5), new Color(i*20+50,200,j*20+50),660/5,680/5);
+                }
+            }
+            g.setColor(Color.WHITE);
+            this.centeredString(g,"You won!",330,340);
+
+        }else{
+            for(int i = 0;i<5;i++){
+                for(int j = 0;j<5;j++){
+                    Block.drawSquare(g,i*(660/5), j*(680/5), new Color(255,i*20+50,j*20+50),660/5,680/5);
+                }
+            }
+            g.setColor(Color.WHITE);
+
+            this.centeredString(g,"You lost!",330,340);
+        }
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+        this.centeredString(g,"Press space to return to menu",330,600);
+    }
+    private void drawSingleplayerGameOver(Graphics g){
+        for(int i = 0;i<5;i++){
+            for(int j = 0;j<5;j++){
+                Block.drawSquare(g,i*(660/5), j*(680/5), new Color(i*20+50,200,j*20+50),660/5,680/5);
+            }
+        }
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 30));
+        this.centeredString(g,"Great job!",330,340);
+        g.setFont(new Font("Arial", Font.BOLD, 40));
+
+        this.centeredString(g,"Total score: "+points,330,380);
+
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+        this.centeredString(g,"Press space to return to menu",330,600);
+
+    }
+    private void drawInstructions(Graphics g){
+        g.setColor(Color.BLACK);
+        g.fillRect(0,0,1000,1000);
+        ipField.setVisible(true);
+
+
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 40));
+        this.centeredString(g,"Instructions",330,90);
+
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+        this.centeredString(g,"Press i again to close",330,50);
+        this.centeredString(g,"You can play multiplayer or singleplayer",330,150);
+        this.centeredString(g,"Select gamemode desired on the menu screen",330,190);
+        this.centeredString(g,"If playing multiplayer, server must have started already",330,210);
+        this.centeredString(g,"If playing multiplayer, do not ready up until more have connected",330,230);
+        this.centeredString(g,"Once in game, use left and right arrow keys to move current block",330,270);
+        this.centeredString(g,"Up arrow key rotates the block",330,290);
+        this.centeredString(g,"Down arrow key drops the block faster",330,310);
+        this.centeredString(g,"Space drops the block immediately",330,330);
+        this.centeredString(g,"C stores the block so it can be used later",330,350);
+
+        this.centeredString(g,"Fill in complete rows to clear them",330,390);
+        this.centeredString(g,"If blocks touch the top, you lose",330,410);
+
+        this.centeredString(g,"In multiplayer, you can see other people's boards",330,450);
+        this.centeredString(g,"When clearing rows, they are sent to opponents",330,470);
+        this.centeredString(g,"Game ends when everyone but one person is alive",330,490);
+        this.centeredString(g,"If server is not hosted at ip: "+Var.ip,330,620);
+
+        g.setFont(new Font("Arial", Font.BOLD, 40));
+        g.drawString("Update IP: ",100,590);
+
+
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+        g.setColor(new Color(255,0,0));
+        this.centeredString(g,prompt,330,665);
+
+    }
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        g.setColor(Color.WHITE);
+        g.fillRect(0,0,1000,1000);
+
+        if(!instructions){
+
+            ipField.setVisible(false);
+        }
+
+        if(instructions){
+            this.drawInstructions(g);
+            return;
+        }
+        if(grid==null && lobby == false){
+            this.drawMenu(g);
+            return;
+        }else if(grid==null && lobby){
+            this.drawLobby(g);
+            return;
+        }
+        if(grid.getGameOver() && Var.networking && !gameFinished){
+            this.drawOpponentsGameOver(g);
+            return;
+        }
+        if(gameFinished && Var.networking){
+            this.drawMultiplayerGameOver(g);
+            return;
+        }else if(gameFinished && !Var.networking){
+            this.drawSingleplayerGameOver(g);
             return;
 
         }
 
+        // draw queued blocks
         DLList<Block> futureBlocks = grid.getFutureBlocks();
         for(int i = 0;i<3;i++){
             futureBlocks.get(i).drawMe(g,360,20+i*Var.gridHeight*4);
         }
 
 
-        
+        // draw grid
         grid.drawMe(g,40,20);
 
         if(Var.networking){
+            // draw other players grid
             if(!grid.getGameOver()){
-
                 for(int i = 0;i<opponentGrids.size();i++){
-                    opponentGrids.get(i).drawMe(g,360+Var.opponentWidthBlock*Var.gridWidth*i+20*i,640-20-Var.opponentHeightBlock*Var.gridHeight);
+                    opponentGrids.get(i).drawMe(g,360+(Var.opponentWidthBlock*Var.gridWidth+20)*(i/2),640-(20+Var.opponentHeightBlock*Var.gridHeight)*(i%2+1));
                 }
             }
-            
         }else{
+            // draw points
             g.setFont(new Font("Arial", Font.PLAIN, 30));
             g.setColor(Color.BLACK);
             g.drawString(points+" points", Var.widthBlock*Var.gridWidth+60, Var.heightBlock*Var.gridHeight+20);
@@ -302,7 +396,24 @@ public class Screen extends JPanel implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent e) {
+        if(e.getSource()==ipField){
+            String entry = ipField.getText();
+            if(entry.equals("")){
+                ipField.setText("");
+                ipField.setFocusable(false);
+                ipField.setFocusable(true);
 
+            }else{
+
+                Var.ip = entry;
+                prompt = "IP updated to "+entry;
+                ipField.setText("");
+                ipField.setFocusable(false);
+                ipField.setFocusable(true);
+
+            }    
+            repaint();
+        }
     }
     public void playSound(String fileName, boolean loop) {
         if(Var.music==false){
@@ -387,6 +498,7 @@ public class Screen extends JPanel implements ActionListener {
                             break;
                         
                     }
+                    speed =  Math.max(350-points/70,230);
                 }
                 int queuedRemoved = 0;
                 if(queuedRows>0){
@@ -405,13 +517,13 @@ public class Screen extends JPanel implements ActionListener {
                     if(grid.getClearedRows()!=0 && queuedRows==0){
                         int clearedRows;
                         if(grid.getClearedRows()==4){
-                            clearedRows = (int)(7.0/(Math.max((double)opponentGrids.size()/2.0,1.0)));
+                            clearedRows = (int)(7.0/(Math.max((double)opponentGrids.size()/1.5,1.0)));
                         }else if(grid.getClearedRows()==3){
-                            clearedRows = (int)(5.0/(Math.max((double)opponentGrids.size()/2.0,1.0)));
+                            clearedRows = (int)(5.0/(Math.max((double)opponentGrids.size()/1.5,1.0)));
                         }else if(grid.getClearedRows()==2){
-                            clearedRows = (int)(2.0/(Math.max((double)opponentGrids.size()/2.0,1.0)));
+                            clearedRows = (int)(2.0/(Math.max((double)opponentGrids.size()/1.5,1.0)));
                         }else{
-                            clearedRows = (int)(1.0/(Math.max((double)opponentGrids.size()/2.0,1.0)));
+                            clearedRows = (int)(1.0/(Math.max((double)opponentGrids.size()/1.5,1.0)));
                         }
                         clearedRows-=queuedRemoved;
                         out.println("lines"+clearedRows);
@@ -457,7 +569,7 @@ public class Screen extends JPanel implements ActionListener {
             System.out.println(e);
 
             lobby = false;
-            prompt = "Unable to connect, check IP and server status";
+            prompt = "Unable to connect to IP "+Var.ip;
             repaint();
         }
 

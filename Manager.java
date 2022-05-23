@@ -3,6 +3,7 @@ public class Manager {
     private DLList<ServerThread> deadThreads;
     private int readyCount;
     private int deadCount;
+    private boolean playing = false;
     public Manager(){
         threads = new DLList<ServerThread>();
         deadThreads = new DLList<ServerThread>();
@@ -22,7 +23,9 @@ public class Manager {
                 readyCount--;
             }
             System.out.println(readyCount+" are connected");
+            
             if(readyCount == threads.size()){
+                playing = true;
                 for(int i = 0; i < threads.size(); i++){
                     threads.get(i).update("start");
                 }
@@ -48,10 +51,14 @@ public class Manager {
                 }
             }
         }else if(message.equals("clear")){
-            threads.clear();
-            deadThreads.clear();
-            readyCount = 0;
-            deadCount = 0;
+            if(playing){
+
+                threads.clear();
+                deadThreads.clear();
+                readyCount = 0;
+                deadCount = 0;
+                playing = false;
+            }
         }else{
 
             // System.out.println("Trying to send "+message);

@@ -69,15 +69,24 @@ public class KeyboardThread implements Runnable{
                     System.out.println(e);
                 }
             }
-            if(Input.keyboard[32]){
+            if(Input.keyboard[73]){
                 if(!sc.playing()){
-                    if(sc.lobby()){
+                    sc.changeInstructions();
+                }
+                try {
+                    Thread.sleep(300);
+                } catch (InterruptedException e) {
+                    System.out.println(e);
+                }
+            }
+            if(Input.keyboard[32] || Input.keyboard[10]){
+                if(!sc.playing()){
+                    if(sc.lobby() && !sc.instructions()){
                         sc.ready();
                     }else if(sc.gameFinished()){
                         sc.returnToMenu();
-                    }else{
+                    }else if(!sc.instructions()){
                         sc.setUp();
-
                     }
                 }else{
                     while(grid.isMoving()){
@@ -91,12 +100,6 @@ public class KeyboardThread implements Runnable{
                 } catch (InterruptedException e) {
                     System.out.println(e);
                 }
-            }
-            if(Input.keyboard[10]){
-                if(!sc.playing()){
-                    sc.setUp();
-                }
-
             }
             if(Input.keyboard[40]){
                 if(grid==null){
