@@ -4,7 +4,7 @@ public class Runner {
 
     public static void main(String args[]) {
 
-        JFrame frame = new JFrame("Screen");
+        JFrame frame = new JFrame("Tetris");
 
         Screen sc = new Screen();
         frame.add(sc);
@@ -12,6 +12,7 @@ public class Runner {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
+        frame.setResizable(false);
 
         sc.animate();
 

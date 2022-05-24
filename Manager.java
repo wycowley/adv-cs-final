@@ -9,10 +9,19 @@ public class Manager {
         deadThreads = new DLList<ServerThread>();
     }
     public void add(ServerThread thread){
-        threads.add(thread);
+        if(!playing){
+            threads.add(thread);
+        }else{
+            thread.update("kickout");
+        }
     }
     public void remove(ServerThread thread){
-        threads.remove(thread);
+        try {
+            
+            threads.remove(thread);
+        } catch (NullPointerException e) {
+            System.out.println("Thread is already not in the list");
+        }
     }
 
     public synchronized void update(String message, ServerThread from){

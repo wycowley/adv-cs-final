@@ -11,6 +11,6 @@ public class Var{
      
     public static final boolean debug = false;
     public static boolean networking = false;
-    public static boolean music = false;
+    public static boolean music = true;
     
 }

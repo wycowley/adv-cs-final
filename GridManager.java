@@ -8,6 +8,9 @@ public class GridManager {
     private int blockNum = 0;
     private int rowsCleared = 0; 
     private boolean gameOver = false;
+
+    private boolean buffered = false;
+    private boolean calculating = false;
     public GridManager(){
         for(int i = 0;i<grid.length;i++){
             for(int j = 0;j<grid[i].length;j++){
@@ -250,10 +253,16 @@ public class GridManager {
 
     }
     public synchronized void moveRightActiveBlock(){
-        if(gameOver)
+        while(calculating){}
+        calculating = true;
+
+        if(gameOver){
+            calculating = false;
             return;
+        }
         Block b = blocks.get(blocks.size()-1);
         if(!b.isMoving()){
+            calculating = false;
             return;
         }
         DLList<Tile> tiles = b.getTiles();
@@ -282,12 +291,18 @@ public class GridManager {
             int newRotationY = b.getRotationStart().getY();
             b.setRotationStart(new Tile(newRotationX,newRotationY));
         }
+        calculating = false;
     }
     public synchronized void moveLeftActiveBlock(){
-        if(gameOver)
+        while(calculating){}
+        calculating = true;
+        if(gameOver){
+            calculating = false;
             return;
+        }
         Block b = blocks.get(blocks.size()-1);
         if(!b.isMoving()){
+            calculating = false;
             return;
         }
         DLList<Tile> tiles = b.getTiles();
@@ -317,24 +332,35 @@ public class GridManager {
             b.setRotationStart(new Tile(newRotationX,newRotationY));
 
         }
+        calculating = false;
 
 
     }
     public synchronized void moveDownActiveBlock(){
         if(gameOver)
             return;
+        while(calculating){
+        }
+        calculating = true;
         // TODO: Make sure that it only gets the right block
         Block b = blocks.get(blocks.size()-1);
         // System.out.println("TRYING TO MOVE DOWN");
         // System.out.println("MOVING? "+b.isMoving());
         if(!b.isMoving()){
             // System.out.println("WHAT IS HAPPENING??");
+            calculating = false;
+
             return;
         }
         // check for a collision
         if(collision('d',b)){
             // stop moving
-            setMoving(false);
+            if(buffered){
+                setMoving(false);
+                buffered = false;
+            }else{
+                buffered = true;
+            }
         }else{
             // move down
             DLList<Tile> tiles = b.getTiles();
@@ -361,6 +387,7 @@ public class GridManager {
 
 
         }
+        calculating = false;
     }
     public boolean collision(char direction, Block b){
         if(direction=='d'){
@@ -533,8 +560,12 @@ public class GridManager {
         }
     }
     public synchronized void rotateActiveBlock(){
-        if(gameOver)
+        while(calculating){}
+        calculating = true;
+        if(gameOver){
+            calculating = false;
             return;
+        }
         // System.out.println("Rotated");
         // get the rotation start, and the size of the rotation matrix
         Block b = blocks.get(blocks.size()-1);
@@ -576,6 +607,7 @@ public class GridManager {
 
 
                 if(initialY<0 || initialY>=Var.gridHeight){
+                    calculating = false;
                     return;
                 }
                 if(grid[initialX][initialY].containsBlock()){
@@ -589,6 +621,7 @@ public class GridManager {
         
                         if(grid[rotatedX][rotatedY].containsBlock() && !grid[rotatedX][rotatedY].getBlock().equals(b)){
                             // System.out.println("Rotating into a block");
+                            calculating = false;
                             return;
                         }
                     }
@@ -635,6 +668,7 @@ public class GridManager {
 
             }
         }
+        calculating = false;
     }
     public int getClearedRows(){
         int cleared = rowsCleared;

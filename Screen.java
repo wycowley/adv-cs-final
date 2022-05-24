@@ -8,7 +8,6 @@ import java.io.*;
 import java.net.*;
 import javax.sound.sampled.*;
 
-// import thread
 
 public class Screen extends JPanel implements ActionListener {
     private GridManager grid;
@@ -35,8 +34,13 @@ public class Screen extends JPanel implements ActionListener {
     private int speed = 100;
 
     private String prompt = "";
+    private Socket serverSocket;
 
     private DLList<OpponentGrid> opponentGrids = new DLList<OpponentGrid>();
+    private Clip mainMusic;
+    private FileReader reader;
+    private FileWriter writer;
+
 
     public Screen() {
         this.setLayout(null);
@@ -45,6 +49,8 @@ public class Screen extends JPanel implements ActionListener {
         keyManager = new KeyboardThread(grid, this);
         Thread keyboardThread = new Thread(keyManager);
         keyboardThread.start();
+
+        this.read();
 
         this.setFocusable(true);
 
@@ -55,14 +61,14 @@ public class Screen extends JPanel implements ActionListener {
 
 
         this.add(ipField);
-        
+        this.playSound("sound/tetris.wav", true);
+
 
         
 
     }
     public void startGame(){
 
-        this.playSound("sound/tetris.wav", true);
         System.out.println("Started starting game");
         grid = new GridManager();
         keyManager.updateGrid(grid);
@@ -173,6 +179,8 @@ public class Screen extends JPanel implements ActionListener {
 
         this.centeredString(g,"Use arrow keys to navigate",330,600);
         this.centeredString(g,"Press space or enter to start",330,620);
+        this.centeredString(g,"Press m to mute sound",330,640);
+
         this.centeredString(g,"Press i for instructions",330,50);
 
         g.setFont(new Font("Arial", Font.BOLD, 20));
@@ -335,6 +343,7 @@ public class Screen extends JPanel implements ActionListener {
             return;
         }
         if(grid.getGameOver() && Var.networking && !gameFinished){
+            System.out.println("Drawing "+tick);
             this.drawOpponentsGameOver(g);
             return;
         }
@@ -394,11 +403,20 @@ public class Screen extends JPanel implements ActionListener {
         g.drawString(s, centeredX-stringLen/2, y);
 
     }
-
+    public void mute(){
+        if(mainMusic.isOpen()){
+            mainMusic.close();
+            Var.music = false;
+        }else{
+            Var.music = true;
+            playSound("sound/tetris.wav",true);
+           
+        }
+    }
     public void actionPerformed(ActionEvent e) {
         if(e.getSource()==ipField){
             String entry = ipField.getText();
-            if(entry.equals("")){
+            if(entry.trim().equals("")){
                 ipField.setText("");
                 ipField.setFocusable(false);
                 ipField.setFocusable(true);
@@ -411,6 +429,7 @@ public class Screen extends JPanel implements ActionListener {
                 ipField.setFocusable(false);
                 ipField.setFocusable(true);
 
+                this.write();
             }    
             repaint();
         }
@@ -422,10 +441,16 @@ public class Screen extends JPanel implements ActionListener {
         try {
             URL url = this.getClass().getClassLoader().getResource(fileName);
             Clip clip = AudioSystem.getClip();
-            clip.open(AudioSystem.getAudioInputStream(url));
-            clip.start();
             if(loop){
+                // audioInputStream = ;
+                clip.open(AudioSystem.getAudioInputStream(url));
+                clip.start();
+                
                 clip.loop(Clip.LOOP_CONTINUOUSLY);
+                mainMusic = clip;
+            }else{
+                clip.open(AudioSystem.getAudioInputStream(url));
+                clip.start();
             }
 
         } catch (Exception exc) {
@@ -438,7 +463,7 @@ public class Screen extends JPanel implements ActionListener {
             try{
                 Thread.sleep(speed);
             }catch(Exception e){
-                e.printStackTrace();
+                System.out.println(e);
             }
             tick++;
             if(lobby){
@@ -454,6 +479,13 @@ public class Screen extends JPanel implements ActionListener {
     
                             this.startGame();
                         }
+                        if(input.equals("kickout")){
+                            Var.networking = false;
+                            lobby = false;
+                            prompt = "Wait for previous game to end";
+                            serverSocket.close();
+                            // this.startGame();
+                        }
                     }
                 } catch (IOException e) {
                     System.out.println(e);
@@ -465,6 +497,7 @@ public class Screen extends JPanel implements ActionListener {
                 continue;
             }
             
+
             if(!Var.debug){
                 grid.moveDownActiveBlock();
             }
@@ -477,7 +510,10 @@ public class Screen extends JPanel implements ActionListener {
                 repaint();
                 continue;
             }
-
+            if(grid.getGameOver()){
+                repaint();
+                continue;
+            }
             if(!grid.isMoving()){
                 // System.out.println("CREATING NEW BLOCK");
                 if(grid.getClearedRows()!=0){
@@ -500,6 +536,7 @@ public class Screen extends JPanel implements ActionListener {
                     }
                     speed =  Math.max(350-points/70,230);
                 }
+
                 int queuedRemoved = 0;
                 if(queuedRows>0){
                     if(grid.getClearedRows()!=0){
@@ -509,6 +546,7 @@ public class Screen extends JPanel implements ActionListener {
                     }else{
                         if(queuedRows>1){
                             grid.addRows(queuedRows/2);
+                            this.playSound("sound/add.wav",false);
                         }
                         queuedRows = queuedRows%2;
                     }
@@ -517,9 +555,9 @@ public class Screen extends JPanel implements ActionListener {
                     if(grid.getClearedRows()!=0 && queuedRows==0){
                         int clearedRows;
                         if(grid.getClearedRows()==4){
-                            clearedRows = (int)(7.0/(Math.max((double)opponentGrids.size()/1.5,1.0)));
+                            clearedRows = (int)(6.0/(Math.max((double)opponentGrids.size()/1.5,1.0)));
                         }else if(grid.getClearedRows()==3){
-                            clearedRows = (int)(5.0/(Math.max((double)opponentGrids.size()/1.5,1.0)));
+                            clearedRows = (int)(4.0/(Math.max((double)opponentGrids.size()/1.5,1.0)));
                         }else if(grid.getClearedRows()==2){
                             clearedRows = (int)(2.0/(Math.max((double)opponentGrids.size()/1.5,1.0)));
                         }else{
@@ -528,11 +566,13 @@ public class Screen extends JPanel implements ActionListener {
                         clearedRows-=queuedRemoved;
                         out.println("lines"+clearedRows);
                     }
+
                 }
                 grid.createBlock();
                 if(grid.collision('d',grid.getActiveBlock())){
                     grid.gameOver();
                     if(Var.networking){
+
                         out.println("dead");
                     }else{
 
@@ -543,11 +583,13 @@ public class Screen extends JPanel implements ActionListener {
                     
                 }
 
+
             }
             this.repaint();
             
         }
     }
+    
     public void poll(){
         // if(!Var.networking){
         //     return;
@@ -556,20 +598,21 @@ public class Screen extends JPanel implements ActionListener {
 
         String hostName = Var.ip; 
 		int portNumber = 3333;
-        Socket serverSocket;
         try {
-            serverSocket = new Socket(hostName, portNumber);
-
+            serverSocket = new Socket();
+            SocketAddress address = new InetSocketAddress(hostName, portNumber);
+            serverSocket.connect(address, 5000);
             out = new PrintWriter(serverSocket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()));
             pin = new PushbackInputStream(serverSocket.getInputStream());
             System.out.println("Connected");
+
         } catch (IOException e) {
             System.out.println("UNABLE TO CONNECT");
             System.out.println(e);
 
             lobby = false;
-            prompt = "Unable to connect to IP "+Var.ip;
+            prompt = "Unable to connect to IP: "+Var.ip;
             repaint();
         }
 
@@ -670,8 +713,38 @@ public class Screen extends JPanel implements ActionListener {
         this.speed = 100;
 
         // grid = null;
+    }
+    private void write(){
+
+        File file = new File("./resources/IP.TXT");
+
+        try {
+            writer = new FileWriter(file);
+            writer.write(Var.ip);
+            writer.flush();
+            writer.close(); //Make sure to close when done reading
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
 
     }
+    private void read(){
+
+        File file = new File("./resources/IP.TXT");
+        try {
+            reader = new FileReader(file);
+            char[] text = new char[50];
+            reader.read(text); // reads the content and put it to the array
+            //You can also convert the char array to String, 
+            String str = new String( text );
+            Var.ip = str.trim();
+            reader.close(); //Make sure to close when done reading
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     
 
 
