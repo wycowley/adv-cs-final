@@ -41,7 +41,7 @@ public class Screen extends JPanel implements ActionListener {
     private FileReader reader;
     private FileWriter writer;
 
-
+    
     public Screen() {
         this.setLayout(null);
 
@@ -69,7 +69,7 @@ public class Screen extends JPanel implements ActionListener {
     }
     public void startGame(){
 
-        System.out.println("Started starting game");
+        // System.out.println("Started starting game");
         grid = new GridManager();
         keyManager.updateGrid(grid);
 
@@ -343,7 +343,7 @@ public class Screen extends JPanel implements ActionListener {
             return;
         }
         if(grid.getGameOver() && Var.networking && !gameFinished){
-            System.out.println("Drawing "+tick);
+            // System.out.println("Drawing "+tick);
             this.drawOpponentsGameOver(g);
             return;
         }
@@ -412,6 +412,12 @@ public class Screen extends JPanel implements ActionListener {
             playSound("sound/tetris.wav",true);
            
         }
+    }
+    public PrintWriter getWriter(){
+        return out;
+    }
+    public void dead(){
+        out.println("dead");
     }
     public void actionPerformed(ActionEvent e) {
         if(e.getSource()==ipField){
@@ -658,12 +664,12 @@ public class Screen extends JPanel implements ActionListener {
             while(pin.available()!=0){
                 String message = in.readLine();
                 if(message.contains("win")){
-                    System.out.println("YOU WIN!");
+                    // System.out.println("YOU WIN!");
                     grid.gameOver();
                     this.handleMultiplayerWin();
                 }
                 if(message.contains("lose")){
-                    System.out.println("YOU LOSE");
+                    // System.out.println("YOU LOSE");
                     this.handleMultiplayerLoss();
 
                 }

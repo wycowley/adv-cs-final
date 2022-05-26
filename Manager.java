@@ -33,7 +33,7 @@ public class Manager {
             }
             System.out.println(readyCount+" are connected");
             
-            if(readyCount == threads.size()){
+            if(readyCount == threads.size() && readyCount > 1){
                 playing = true;
                 for(int i = 0; i < threads.size(); i++){
                     threads.get(i).update("start");
@@ -50,9 +50,13 @@ public class Manager {
                     if(deadThreads.contains(threads.get(i))){
                         threads.get(i).update("lose");
                     }else{
-                        System.out.println("Sending over a win");
+                        // System.out.println("Sending over a win");
                         // this thread is the winning thread
                         threads.get(i).update("win");
+                        threads.get(i).update("win");
+                        threads.get(i).update("win");
+                        threads.get(i).update("win");
+
                         // threads.get(i).update("hi");
 
                     }
