@@ -261,9 +261,11 @@ public class Screen extends JPanel implements ActionListener {
             g.setColor(Color.WHITE);
 
             this.centeredString(g,"You lost!",330,340);
+            
         }
         g.setFont(new Font("Arial", Font.BOLD, 20));
         this.centeredString(g,"Press space to return to menu",330,600);
+        this.centeredString(g,"If stuck in this menu, restart the program.",330,620);
     }
     private void drawSingleplayerGameOver(Graphics g){
         for(int i = 0;i<5;i++){
@@ -417,7 +419,9 @@ public class Screen extends JPanel implements ActionListener {
         return out;
     }
     public void dead(){
-        out.println("dead");
+        if(out != null){
+            out.println("dead");
+        }
     }
     public void actionPerformed(ActionEvent e) {
         if(e.getSource()==ipField){
@@ -561,9 +565,9 @@ public class Screen extends JPanel implements ActionListener {
                     if(grid.getClearedRows()!=0 && queuedRows==0){
                         int clearedRows;
                         if(grid.getClearedRows()==4){
-                            clearedRows = (int)(6.0/(Math.max((double)opponentGrids.size()/1.5,1.0)));
+                            clearedRows = Math.max((int)(6.0/(Math.max((double)opponentGrids.size()/1.5,1))),2);
                         }else if(grid.getClearedRows()==3){
-                            clearedRows = (int)(4.0/(Math.max((double)opponentGrids.size()/1.5,1.0)));
+                            clearedRows = Math.max((int)(4.0/(Math.max((double)opponentGrids.size()/1.5,1))),1);
                         }else if(grid.getClearedRows()==2){
                             clearedRows = (int)(2.0/(Math.max((double)opponentGrids.size()/1.5,1.0)));
                         }else{

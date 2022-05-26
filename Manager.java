@@ -38,6 +38,7 @@ public class Manager {
                 for(int i = 0; i < threads.size(); i++){
                     threads.get(i).update("start");
                 }
+                deadCount = 0;
             }
         }else if(message.equals("dead")){
             System.out.println("SOMEONE IS DEAD?");
@@ -53,9 +54,9 @@ public class Manager {
                         // System.out.println("Sending over a win");
                         // this thread is the winning thread
                         threads.get(i).update("win");
-                        threads.get(i).update("win");
-                        threads.get(i).update("win");
-                        threads.get(i).update("win");
+                        // threads.get(i).update("win");
+                        // threads.get(i).update("win");
+                        // threads.get(i).update("win");
 
                         // threads.get(i).update("hi");
 
