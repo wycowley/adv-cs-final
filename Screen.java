@@ -310,7 +310,7 @@ public class Screen extends JPanel implements ActionListener {
         this.centeredString(g,"In multiplayer, you can see other people's boards",330,450);
         this.centeredString(g,"When clearing rows, they are sent to opponents",330,470);
         this.centeredString(g,"Game ends when everyone but one person is alive",330,490);
-        this.centeredString(g,"If server is not hosted at ip: "+Var.ip,330,620);
+        this.centeredString(g,"If server is not hosted at ip: "+Var.ip+",",330,530);
 
         g.setFont(new Font("Arial", Font.BOLD, 40));
         g.drawString("Update IP: ",100,590);
